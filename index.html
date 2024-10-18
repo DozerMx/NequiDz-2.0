@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nequi Mockup</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1f0020;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .logo img {
+            width: 300px;
+        }
+
+        .input-container {
+            margin-top: 20px;
+        }
+
+        .input-container input {
+            width: 300px;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4d334e;
+            color: #fff;
+            outline: none;
+            text-align: center;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            width: 300px;
+            padding: 15px;
+            background-color: #db0082;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #db0082;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://i.postimg.cc/MHwxYt1F/Picsart-24-10-18-02-45-24-316.jpg" alt="Nequi Logo">
+        </div>
+
+        <div class="input-container">
+            <input type="text" placeholder="+57" id="phoneInput" maxlength="15">
+        </div>
+
+        <div class="button-container">
+            <button onclick="entrar()">Entra</button>
+        </div>
+    </div>
+
+    <script>
+        function entrar() {
+            const phoneNumber = document.getElementById('phoneInput').value.trim();
+            if (phoneNumber === '666') {
+                // Redirige a la imagen estática
+                window.location.href = 'imagen.html';
+            } else {
+                alert('Número incorrecto.');
+            }
+        }
+    </script>
+</body>
+</html>
