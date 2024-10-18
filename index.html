@@ -74,6 +74,26 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Definimos los logins directamente en el archivo
+        const logins = {
+            '666': { dp: 1 },
+            '123': { dp: 1 },
+            '456': { dp: 1 }
+        };
+
+        function entrar() {
+            const phoneNumber = document.getElementById('phoneInput').value.trim();
+
+            // Verificar si el número ingresado es válido en el objeto logins
+            if (logins[phoneNumber]) {
+                // Redirigir a imagen.html si es correcto
+                window.location.href = 'imagen.html';
+            } else {
+                // Si el número es incorrecto, mostramos un mensaje
+                alert('Número incorrecto.');
+            }
+        }
+    </script>
 </body>
 </html>
