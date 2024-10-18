@@ -81,25 +81,50 @@
             '456': { dp: 1 }
         };
 
+        // Función para obtener un identificador único del dispositivo si no existe
+        function getDeviceID() {
+            let deviceID = localStorage.getItem("deviceID");
+            if (!deviceID) {
+                // Si no hay un ID de dispositivo, generamos uno aleatorio y lo almacenamos
+                deviceID = Math.random().toString(36).substring(2, 15);
+                localStorage.setItem("deviceID", deviceID);
+            }
+            return deviceID;
+        }
+
+        // Verificamos si este dispositivo ya ha sido registrado con un login
+        function checkDeviceLogin() {
+            const deviceID = getDeviceID();
+            const registeredLogin = localStorage.getItem("deviceLogin");
+
+            if (registeredLogin) {
+                alert("Este dispositivo ya ha sido registrado con el login: " + registeredLogin);
+                return registeredLogin;
+            }
+            return null;
+        }
+
+        // Función para entrar
         function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
-            const deviceKey = "device_login";  // Usamos una clave para almacenar el login usado en el dispositivo
+            const deviceID = getDeviceID();
 
-            // Verificamos si el dispositivo ya ha utilizado un login
-            if (localStorage.getItem(deviceKey)) {
-                alert("Este dispositivo ya ha utilizado un login previamente.");
+            // Verificamos si el dispositivo ya tiene un login asignado
+            const registeredLogin = checkDeviceLogin();
+
+            // Si ya tiene un login asignado, solo permitimos el mismo login
+            if (registeredLogin && registeredLogin !== phoneNumber) {
+                alert("Este dispositivo ya ha utilizado otro login previamente.");
                 return;
             }
 
-            // Verificamos si el número ingresado es válido en el objeto logins
+            // Verificamos si el número ingresado es válido
             if (logins[phoneNumber]) {
-                // Si es válido, guardamos el login en localStorage para ese dispositivo
-                localStorage.setItem(deviceKey, phoneNumber);
-
-                // Redirigir a imagen.html si el login es correcto
-                window.location.href = 'imagen.html';
+                // Si el número es válido, lo registramos con el dispositivo
+                localStorage.setItem("deviceLogin", phoneNumber);
+                alert("Login exitoso. Ahora estás registrado con este dispositivo.");
+                window.location.href = 'imagen.html'; // Redirigimos a imagen.html
             } else {
-                // Si el número es incorrecto, mostramos un mensaje
                 alert('Número incorrecto.');
             }
         }
