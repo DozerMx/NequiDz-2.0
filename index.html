@@ -75,58 +75,47 @@
     </div>
 
     <script>
+        // Definimos los logins posibles en una variable (normalmente esto vendría de un archivo o backend)
         const logins = {
             '666': { dp: 1 },
             '123': { dp: 1 },
             '456': { dp: 1 }
         };
 
-        // Función para obtener un identificador único del dispositivo si no existe
+        // Función para generar un identificador único para el dispositivo
         function getDeviceID() {
             let deviceID = localStorage.getItem("deviceID");
             if (!deviceID) {
-                // Si no hay un ID de dispositivo, generamos uno aleatorio y lo almacenamos
-                deviceID = Math.random().toString(36).substring(2, 15);
-                localStorage.setItem("deviceID", deviceID);
+                deviceID = Math.random().toString(36).substring(2, 15);  // Genera un ID único para este dispositivo
+                localStorage.setItem("deviceID", deviceID);  // Lo guarda en el localStorage para uso futuro
             }
             return deviceID;
         }
 
-        // Verificamos si este dispositivo ya ha sido registrado con un login
-        function checkDeviceLogin() {
-            const deviceID = getDeviceID();
-            const registeredLogin = localStorage.getItem("deviceLogin");
-
-            if (registeredLogin) {
-                alert("Este dispositivo ya ha sido registrado con el login: " + registeredLogin);
-                return registeredLogin;
-            }
-            return null;
-        }
-
-        // Función para entrar
+        // Función para manejar el login
         function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
             const deviceID = getDeviceID();
 
-            // Verificamos si el dispositivo ya tiene un login asignado
-            const registeredLogin = checkDeviceLogin();
-
-            // Si ya tiene un login asignado, solo permitimos el mismo login
-            if (registeredLogin && registeredLogin !== phoneNumber) {
-                alert("Este dispositivo ya ha utilizado otro login previamente.");
+            // Verificamos si el número está en la lista de logins permitidos
+            if (!logins[phoneNumber]) {
+                alert('Número incorrecto.');
                 return;
             }
 
-            // Verificamos si el número ingresado es válido
-            if (logins[phoneNumber]) {
-                // Si el número es válido, lo registramos con el dispositivo
-                localStorage.setItem("deviceLogin", phoneNumber);
-                alert("Login exitoso. Ahora estás registrado con este dispositivo.");
-                window.location.href = 'imagen.html'; // Redirigimos a imagen.html
-            } else {
-                alert('Número incorrecto.');
+            // Verificamos si el login ya ha sido registrado en otro dispositivo
+            const registeredDeviceID = localStorage.getItem("registeredDeviceID");
+            
+            if (registeredDeviceID && registeredDeviceID !== deviceID) {
+                alert('Este login ya ha sido registrado en otro dispositivo.');
+                return;
             }
+
+            // Si es el primer login o el login es el mismo en este dispositivo, lo registramos
+            localStorage.setItem("registeredDeviceID", deviceID);
+            localStorage.setItem("deviceLogin", phoneNumber);
+            alert('Login exitoso.');
+            window.location.href = 'imagen.html';  // Redirigimos a imagen.html
         }
     </script>
 </body>
