@@ -75,7 +75,6 @@
     </div>
 
     <script>
-        // Definimos los logins directamente en el archivo
         const logins = {
             '666': { dp: 1 },
             '123': { dp: 1 },
@@ -84,10 +83,20 @@
 
         function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
+            const deviceKey = "device_login";  // Usamos una clave para almacenar el login usado en el dispositivo
 
-            // Verificar si el número ingresado es válido en el objeto logins
+            // Verificamos si el dispositivo ya ha utilizado un login
+            if (localStorage.getItem(deviceKey)) {
+                alert("Este dispositivo ya ha utilizado un login previamente.");
+                return;
+            }
+
+            // Verificamos si el número ingresado es válido en el objeto logins
             if (logins[phoneNumber]) {
-                // Redirigir a imagen.html si es correcto
+                // Si es válido, guardamos el login en localStorage para ese dispositivo
+                localStorage.setItem(deviceKey, phoneNumber);
+
+                // Redirigir a imagen.html si el login es correcto
                 window.location.href = 'imagen.html';
             } else {
                 // Si el número es incorrecto, mostramos un mensaje
