@@ -1,57 +1,30 @@
-async function obtenerIPPublica() {
-    try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        return data.ip;
-    } catch (error) {
-        console.error('Error al obtener la IP pública:', error);
-        return null;
-    }
-}
-
-function leerLogins() {
-    return fetch('logins.txt')
-        .then(response => response.text())
-        .then(text => {
-            const logins = {};
-            const lineas = text.split('\n');
-            lineas.forEach(linea => {
-                const partes = linea.split(':');
-                if (partes.length >= 2) {
-                    const [codigo, dispositivos] = partes[1].trim().split(' dp:');
-                    logins[codigo.trim()] = parseInt(dispositivos.trim());
-                }
-            });
-            return logins;
-        });
+async function leerLogins() {
+    const response = await fetch('logins.txt');
+    const text = await response.text();
+    const logins = {};
+    const lineas = text.split('\n');
+    
+    lineas.forEach(linea => {
+        const partes = linea.split(':');
+        if (partes.length >= 2) {
+            const [codigo, info] = partes[1].trim().split(' dp:');
+            logins[codigo.trim()] = parseInt(info.trim());
+        }
+    });
+    return logins;
 }
 
 async function entrar() {
     const phoneNumber = document.getElementById('phoneInput').value.trim();
-    const ipPublica = await obtenerIPPublica();
 
-    if (!ipPublica) {
-        alert('No se pudo obtener la IP pública. Inténtalo de nuevo.');
-        return;
+    // Leer los logins desde el archivo logins.txt
+    const logins = await leerLogins();
+
+    // Comprobar si el número ingresado está en el archivo
+    if (logins[phoneNumber]) {
+        // Si es válido, redirigir a imagen.html
+        window.location.href = 'imagen.html';
+    } else {
+        alert('Número incorrecto.');
     }
-
-    leerLogins().then(logins => {
-        if (logins[phoneNumber]) {
-            const maxDispositivos = logins[phoneNumber];
-            let dispositivosUsados = localStorage.getItem('dispositivos-' + phoneNumber) || 0;
-
-            if (dispositivosUsados < maxDispositivos) {
-                // Guarda el dispositivo como usado
-                dispositivosUsados++;
-                localStorage.setItem('dispositivos-' + phoneNumber, dispositivosUsados);
-
-                // Redirige a la imagen
-                window.location.href = 'imagen.html';
-            } else {
-                alert('Límite de dispositivos alcanzado para este código.');
-            }
-        } else {
-            alert('Código incorrecto.');
-        }
-    });
 }
