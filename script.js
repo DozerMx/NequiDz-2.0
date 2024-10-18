@@ -18,7 +18,6 @@ function leerLogins() {
             lineas.forEach(linea => {
                 const partes = linea.split(':');
                 if (partes.length >= 2) {
-                    const nombre = partes[0].trim(); // Este es solo para referencia
                     const [codigo, dispositivos] = partes[1].trim().split(' dp:');
                     logins[codigo.trim()] = parseInt(dispositivos.trim());
                 }
