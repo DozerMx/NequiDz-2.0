@@ -1,83 +1,58 @@
-// Función para obtener la IP pública del dispositivo
-async function obtenerIP() {
+async function obtenerIPPublica() {
     try {
         const response = await fetch('https://api.ipify.org?format=json');
         const data = await response.json();
         return data.ip;
     } catch (error) {
-        console.error('Error al obtener la IP:', error);
+        console.error('Error al obtener la IP pública:', error);
         return null;
     }
 }
 
-// Función para leer el archivo logins.txt
-async function leerLogins() {
-    try {
-        const response = await fetch('logins.txt');
-        const loginsText = await response.text();
-        return loginsText.split('\n').map(line => line.trim()).filter(line => line);
-    } catch (error) {
-        console.error('Error al leer logins.txt:', error);
-        return [];
-    }
+function leerLogins() {
+    return fetch('logins.txt')
+        .then(response => response.text())
+        .then(text => {
+            const logins = {};
+            const lineas = text.split('\n');
+            lineas.forEach(linea => {
+                const partes = linea.split(':');
+                if (partes.length >= 2) {
+                    const nombre = partes[0].trim(); // Este es solo para referencia
+                    const [codigo, dispositivos] = partes[1].trim().split(' dp:');
+                    logins[codigo.trim()] = parseInt(dispositivos.trim());
+                }
+            });
+            return logins;
+        });
 }
 
-// Función para verificar si el login es válido
-async function verificarLogin(nombre, codigo) {
-    const ip = await obtenerIP();
-    const logins = await leerLogins();
+async function entrar() {
+    const phoneNumber = document.getElementById('phoneInput').value.trim();
+    const ipPublica = await obtenerIPPublica();
 
-    if (!ip || logins.length === 0) {
-        alert('No se pudo completar la verificación.');
+    if (!ipPublica) {
+        alert('No se pudo obtener la IP pública. Inténtalo de nuevo.');
         return;
     }
 
-    let usuarioEncontrado = false;
-    
-    logins.forEach(linea => {
-        const [usuario, loginData] = linea.split(':').map(part => part.trim());
-        const [codigoAcceso, dispositivos] = loginData.split('dp:').map(part => part.trim());
-        const maxDispositivos = parseInt(dispositivos);
+    leerLogins().then(logins => {
+        if (logins[phoneNumber]) {
+            const maxDispositivos = logins[phoneNumber];
+            let dispositivosUsados = localStorage.getItem('dispositivos-' + phoneNumber) || 0;
 
-        if (usuario === nombre && codigoAcceso === codigo) {
-            usuarioEncontrado = true;
+            if (dispositivosUsados < maxDispositivos) {
+                // Guarda el dispositivo como usado
+                dispositivosUsados++;
+                localStorage.setItem('dispositivos-' + phoneNumber, dispositivosUsados);
 
-            // Obtener o inicializar el historial de acceso desde el almacenamiento local
-            let historial = JSON.parse(localStorage.getItem('historialAccesos')) || {};
-
-            if (!historial[usuario]) {
-                historial[usuario] = [];
-            }
-
-            // Verificar si la IP ya está en la lista de dispositivos permitidos
-            if (historial[usuario].includes(ip)) {
-                alert(`Bienvenido de nuevo, ${nombre}!`);
-                window.location.href = 'imagen.html'; // Redirigir a la página de imagen
-            } else if (historial[usuario].length < maxDispositivos) {
-                // Agregar la IP a la lista si aún no ha alcanzado el límite de dispositivos
-                historial[usuario].push(ip);
-                localStorage.setItem('historialAccesos', JSON.stringify(historial));
-                alert(`Acceso permitido, ${nombre}!`);
-                window.location.href = 'imagen.html'; // Redirigir a la página de imagen
+                // Redirige a la imagen
+                window.location.href = 'imagen.html';
             } else {
-                alert('Límite de dispositivos alcanzado para este usuario.');
+                alert('Límite de dispositivos alcanzado para este código.');
             }
+        } else {
+            alert('Código incorrecto.');
         }
     });
-
-    if (!usuarioEncontrado) {
-        alert('Login incorrecto.');
-    }
-}
-
-// Función de inicio de sesión al hacer clic en el botón
-async function entrar() {
-    const nombre = prompt('Introduce tu nombre de usuario:');
-    const codigo = document.getElementById('phoneInput').value.trim();
-
-    if (nombre && codigo) {
-        await verificarLogin(nombre, codigo);
-    } else {
-        alert('Por favor, introduce un nombre de usuario y código válidos.');
-    }
 }
