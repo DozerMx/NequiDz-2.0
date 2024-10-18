@@ -75,19 +75,34 @@
     </div>
 
     <script>
-        // Definimos los logins posibles en una variable (normalmente esto vendría de un archivo o backend)
+        // Definimos los logins posibles
         const logins = {
             '666': { dp: 1 },
             '123': { dp: 1 },
             '456': { dp: 1 }
         };
 
-        // Función para generar un identificador único para el dispositivo
+        // Función para obtener el valor de una cookie
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Función para establecer una cookie
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            let expires = "expires=" + d.toUTCString();
+            document.cookie = `${name}=${value}; ${expires}; path=/`;
+        }
+
+        // Función para generar un ID único para el dispositivo
         function getDeviceID() {
-            let deviceID = localStorage.getItem("deviceID");
+            let deviceID = getCookie("deviceID");
             if (!deviceID) {
-                deviceID = Math.random().toString(36).substring(2, 15);  // Genera un ID único para este dispositivo
-                localStorage.setItem("deviceID", deviceID);  // Lo guarda en el localStorage para uso futuro
+                deviceID = Math.random().toString(36).substring(2, 15);
+                setCookie("deviceID", deviceID, 365);  // Guardamos la cookie por un año
             }
             return deviceID;
         }
@@ -103,17 +118,17 @@
                 return;
             }
 
-            // Verificamos si el login ya ha sido registrado en otro dispositivo
-            const registeredDeviceID = localStorage.getItem("registeredDeviceID");
-            
+            // Verificamos si ya hay un dispositivo registrado para este login
+            const registeredDeviceID = getCookie("registeredDeviceID");
+
             if (registeredDeviceID && registeredDeviceID !== deviceID) {
                 alert('Este login ya ha sido registrado en otro dispositivo.');
                 return;
             }
 
-            // Si es el primer login o el login es el mismo en este dispositivo, lo registramos
-            localStorage.setItem("registeredDeviceID", deviceID);
-            localStorage.setItem("deviceLogin", phoneNumber);
+            // Si el login es válido, lo registramos en el dispositivo
+            setCookie("registeredDeviceID", deviceID, 365);
+            setCookie("deviceLogin", phoneNumber, 365);
             alert('Login exitoso.');
             window.location.href = 'imagen.html';  // Redirigimos a imagen.html
         }
