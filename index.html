@@ -5,76 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nequi Mockup</title>
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #1f0020;
-            font-family: Arial, sans-serif;
-        }
-
-        .container {
-            text-align: center;
-        }
-
-        .logo img {
-            width: 300px;
-        }
-
-        .input-container {
-            margin-top: 20px;
-        }
-
-        .input-container input {
-            width: 300px;
-            padding: 15px;
-            font-size: 18px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4d334e;
-            color: #fff;
-            outline: none;
-            text-align: center;
-        }
-
-        .button-container {
-            margin-top: 20px;
-        }
-
-        .button-container button {
-            width: 300px;
-            padding: 15px;
-            background-color: #db0082;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .button-container button:hover {
-            background-color: #db0082;
-        }
+        /* ... (mantén los estilos anteriores) ... */
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="logo">
             <img src="https://i.postimg.cc/MHwxYt1F/Picsart-24-10-18-02-45-24-316.jpg" alt="Nequi Logo">
         </div>
-
         <div class="input-container">
             <input type="text" placeholder="Introduce tu código" id="phoneInput" maxlength="3">
         </div>
-
         <div class="button-container">
             <button onclick="entrar()">Entra</button>
         </div>
     </div>
 
     <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJYSDYOCsYCtzl816X_-cCLdwGwDj8_XQ",
+            authDomain: "nequidz-v2.firebaseapp.com",
+            projectId: "nequidz-v2",
+            storageBucket: "nequidz-v2.appspot.com",
+            messagingSenderId: "318211283571",
+            appId: "1:318211283571:web:cc3b2ca16711d52e796806",
+            measurementId: "G-K2422MDNPJ"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Obtener referencia a la base de datos
+        var database = firebase.database();
+
         // Definimos los logins posibles
         const logins = {
             '666': true,
@@ -106,28 +72,30 @@
                 return;
             }
 
-            // Verificamos si ya hay un login registrado para este dispositivo
-            const registeredLogin = localStorage.getItem("registeredLogin");
-
-            if (registeredLogin) {
-                if (registeredLogin !== phoneNumber) {
-                    alert('Este dispositivo ya tiene registrado otro login.');
-                    return;
-                }
-            } else {
-                // Si no hay login registrado, verificamos si este login ya está usado en otro dispositivo
-                const loginDeviceID = localStorage.getItem(`login_${phoneNumber}`);
-                if (loginDeviceID && loginDeviceID !== deviceID) {
+            // Verificar en Firebase si el login ya está registrado
+            var loginRef = database.ref('logins/' + phoneNumber);
+            loginRef.once('value').then(function(snapshot) {
+                var data = snapshot.val();
+                if (data && data.deviceID !== deviceID) {
                     alert('Este login ya ha sido registrado en otro dispositivo.');
-                    return;
+                } else {
+                    // Registrar o actualizar el login en Firebase
+                    loginRef.set({
+                        deviceID: deviceID,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }).then(function() {
+                        alert('Login exitoso.');
+                        localStorage.setItem("registeredLogin", phoneNumber);
+                        window.location.href = 'imagen.html';  // Redirigimos a imagen.html
+                    }).catch(function(error) {
+                        console.error("Error al registrar el login:", error);
+                        alert('Error al procesar el login. Por favor, intenta de nuevo.');
+                    });
                 }
-            }
-
-            // Si el login es válido y no está usado en otro dispositivo, lo registramos
-            localStorage.setItem("registeredLogin", phoneNumber);
-            localStorage.setItem(`login_${phoneNumber}`, deviceID);
-            alert('Login exitoso.');
-            window.location.href = 'imagen.html';  // Redirigimos a imagen.html
+            }).catch(function(error) {
+                console.error("Error al verificar el login:", error);
+                alert('Error al verificar el login. Por favor, intenta de nuevo.');
+            });
         }
 
         // Verificamos el estado del login al cargar la página
