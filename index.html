@@ -57,11 +57,86 @@
         .button-container button:hover {
             background-color: #db0082;
         }
+
+        #aviso {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            color: white;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        #aviso img {
+            max-width: 200px;
+            margin-top: 20px;
+        }
+
+        #cerrarAviso {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #db0082;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        #aviso h2 {
+            color: #db0082;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #aviso p, #aviso ul {
+            text-align: center;
+            max-width: 600px;
+            margin: 10px auto;
+        }
+
+        #aviso ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #aviso li {
+            margin: 10px 0;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
+    <div id="aviso">
+        <h2>🚨 AVISO IMPORTANTE 🚨</h2>
+        <p>👋 ¡Hola a todos los usuarios de nuestra increíble aplicación! 👋</p>
+        <p>🛡️ Queremos asegurarnos de que estés protegido y bien informado. Por favor, lee este mensaje con atención. 🛡️</p>
+        <p>🔒 La seguridad y autenticidad de nuestra app son nuestra prioridad número uno. 🔒</p>
+        <p>👑 El único y legítimo creador de esta aplicación es <strong>@DozerMx</strong>. 👑</p>
+        <p>⚠️ ¡Cuidado! Cualquier otra persona que afirme ser el creador está intentando engañarte. No caigas en estafas. ⚠️</p>
+        <p>🌟 Para garantizar tu seguridad, solo adquiere la app a través de nuestros vendedores autorizados: 🌟</p>
+        <ul>
+            <li>🦁 @Felino: +57 300 6378620</li>
+            <li>👨‍💼 @Sxmuel: +57 318 8383901</li>
+            <li>🧔 @José: +57 312 6796773</li>
+        </ul>
+        <p>👑 OWNER SUPREMO: @〈☠️𝐃𝐨𝑧𝑍𝑧𝐞𝐫⿻𝐌𝒙⃟🔥〉 👑</p>
+        <p>📞 Mi número personal (solo para asuntos urgentes): +57 320 2895272 📞</p>
+        <p>🚫 No compartas tu información personal con nadie más que no esté en esta lista. 🚫</p>
+        <p>💖 Gracias por confiar en nosotros y ser parte de nuestra comunidad. 💖</p>
+        <p>🎉 ¡Disfruta de la mejor experiencia con nuestra app! 🎉</p>
+        <img src="https://i.postimg.cc/cC34cqQS/Picsart-24-10-19-17-05-43-593.jpg" alt="Logo">
+        <button id="cerrarAviso">🔓 Cerrar aviso y continuar 🔓</button>
+    </div>
+
     <div class="container">
         <div class="logo">
             <img src="https://i.postimg.cc/MHwxYt1F/Picsart-24-10-18-02-45-24-316.jpg" alt="Nequi Logo">
@@ -173,6 +248,11 @@
             if (registeredLogin) {
                 document.getElementById('phoneInput').value = registeredLogin;
             }
+
+            // Agregar funcionalidad para cerrar el aviso
+            document.getElementById('cerrarAviso').addEventListener('click', function() {
+                document.getElementById('aviso').style.display = 'none';
+            });
         };
     </script>
 </body>
