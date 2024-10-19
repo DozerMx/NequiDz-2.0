@@ -101,25 +101,29 @@
         async function cargarLogins() {
             try {
                 const response = await fetch('logins.txt');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const text = await response.text();
+                console.log('Contenido del archivo logins.txt:', text); // Log para depuración
                 const lines = text.split('\n');
                 lines.forEach(line => {
-                    const [name, code, dp] = line.split(':').map(item => item.trim());
-                    if (code && dp) {
-                        logins[code] = {
-                            name: name,
-                            maxDevices: parseInt(dp.split(' ')[1])
-                        };
+                    if (line.trim() !== '') {
+                        const [name, code, dp] = line.split(':').map(item => item.trim());
+                        if (code && dp) {
+                            logins[code] = {
+                                name: name,
+                                maxDevices: parseInt(dp.split(' ')[1])
+                            };
+                        }
                     }
                 });
-                console.log('Logins cargados:', logins);
+                console.log('Logins cargados:', logins); // Log para depuración
             } catch (error) {
                 console.error('Error al cargar los logins:', error);
+                alert('Error al cargar los logins. Por favor, intenta de nuevo más tarde.');
             }
         }
-
-        // Cargar los logins al iniciar
-        cargarLogins();
 
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
@@ -135,15 +139,22 @@
         }
 
         // Función para manejar el login
-        function entrar() {
+        async function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
-            const deviceID = getDeviceID();
+            console.log('Intentando login con:', phoneNumber); // Log para depuración
+            console.log('Logins disponibles:', logins); // Log para depuración
 
-            // Verificamos si el número está en la lista de logins permitidos
+            if (Object.keys(logins).length === 0) {
+                console.log('Recargando logins...'); // Log para depuración
+                await cargarLogins();
+            }
+
             if (!logins[phoneNumber]) {
                 alert('Número incorrecto.');
                 return;
             }
+
+            const deviceID = getDeviceID();
 
             // Verificar en Firebase si el login ya está registrado
             var loginRef = database.ref('logins/' + phoneNumber);
@@ -174,8 +185,9 @@
             });
         }
 
-        // Verificamos el estado del login al cargar la página
-        window.onload = function() {
+        // Cargar los logins al iniciar y esperar a que se complete
+        window.onload = async function() {
+            await cargarLogins();
             const registeredLogin = localStorage.getItem("registeredLogin");
             if (registeredLogin) {
                 document.getElementById('phoneInput').value = registeredLogin;
