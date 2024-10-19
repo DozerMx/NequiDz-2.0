@@ -82,27 +82,15 @@
             '456': true
         };
 
-        // Función para obtener el valor de una cookie
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
-        // Función para establecer una cookie
-        function setCookie(name, value, days) {
-            const d = new Date();
-            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-            let expires = "expires=" + d.toUTCString();
-            document.cookie = `${name}=${value}; ${expires}; path=/`;
-        }
-
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
-            let deviceID = getCookie("deviceID");
+            let deviceID = localStorage.getItem("deviceID");
             if (!deviceID) {
-                deviceID = Math.random().toString(36).substring(2, 15);
-                setCookie("deviceID", deviceID, 365);  // Guardamos la cookie por un año
+                deviceID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+                localStorage.setItem("deviceID", deviceID);
             }
             return deviceID;
         }
@@ -119,7 +107,7 @@
             }
 
             // Verificamos si ya hay un login registrado para este dispositivo
-            const registeredLogin = getCookie("registeredLogin");
+            const registeredLogin = localStorage.getItem("registeredLogin");
 
             if (registeredLogin) {
                 if (registeredLogin !== phoneNumber) {
@@ -128,7 +116,7 @@
                 }
             } else {
                 // Si no hay login registrado, verificamos si este login ya está usado en otro dispositivo
-                const loginDeviceID = getCookie(`login_${phoneNumber}`);
+                const loginDeviceID = localStorage.getItem(`login_${phoneNumber}`);
                 if (loginDeviceID && loginDeviceID !== deviceID) {
                     alert('Este login ya ha sido registrado en otro dispositivo.');
                     return;
@@ -136,11 +124,19 @@
             }
 
             // Si el login es válido y no está usado en otro dispositivo, lo registramos
-            setCookie("registeredLogin", phoneNumber, 365);
-            setCookie(`login_${phoneNumber}`, deviceID, 365);
+            localStorage.setItem("registeredLogin", phoneNumber);
+            localStorage.setItem(`login_${phoneNumber}`, deviceID);
             alert('Login exitoso.');
             window.location.href = 'imagen.html';  // Redirigimos a imagen.html
         }
+
+        // Verificamos el estado del login al cargar la página
+        window.onload = function() {
+            const registeredLogin = localStorage.getItem("registeredLogin");
+            if (registeredLogin) {
+                document.getElementById('phoneInput').value = registeredLogin;
+            }
+        };
     </script>
 </body>
 </html>
