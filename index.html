@@ -94,12 +94,28 @@
         // Obtener referencia a la base de datos
         var database = firebase.database();
 
-        // Definimos los logins posibles
-        const logins = {
-            '3001788752': true,
-            '3006378620': true,
-            '3188383901': true
-        };
+        // Objeto para almacenar los logins
+        let logins = {};
+
+        // Función para cargar los logins desde el archivo
+        function cargarLogins() {
+            fetch('logins.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    lines.forEach(line => {
+                        const [numero, maxDispositivos] = line.split(',');
+                        if (numero && maxDispositivos) {
+                            logins[numero.trim()] = parseInt(maxDispositivos.trim());
+                        }
+                    });
+                    console.log('Logins cargados:', logins);
+                })
+                .catch(error => console.error('Error al cargar logins:', error));
+        }
+
+        // Llamar a la función para cargar los logins al iniciar
+        cargarLogins();
 
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
@@ -120,7 +136,7 @@
             const deviceID = getDeviceID();
 
             // Verificamos si el número está en la lista de logins permitidos
-            if (!logins[phoneNumber]) {
+            if (!(phoneNumber in logins)) {
                 alert('Número incorrecto.');
                 return;
             }
