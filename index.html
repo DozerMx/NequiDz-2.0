@@ -68,7 +68,7 @@
         </div>
 
         <div class="input-container">
-            <input type="text" placeholder="Introduce tu código" id="phoneInput" maxlength="3">
+            <input type="text" placeholder="Introduce tu código" id="phoneInput" maxlength="10">
         </div>
 
         <div class="button-container">
@@ -94,12 +94,32 @@
         // Obtener referencia a la base de datos
         var database = firebase.database();
 
-        // Definimos los logins posibles
-        const logins = {
-            '666': true,
-            '318': true,
-            '879': true
-        };
+        // Objeto para almacenar los logins
+        let logins = {};
+
+        // Función para cargar los logins desde el archivo
+        async function cargarLogins() {
+            try {
+                const response = await fetch('logins.txt');
+                const text = await response.text();
+                const lines = text.split('\n');
+                lines.forEach(line => {
+                    const [name, code, dp] = line.split(':').map(item => item.trim());
+                    if (code && dp) {
+                        logins[code] = {
+                            name: name,
+                            maxDevices: parseInt(dp.split(' ')[1])
+                        };
+                    }
+                });
+                console.log('Logins cargados:', logins);
+            } catch (error) {
+                console.error('Error al cargar los logins:', error);
+            }
+        }
+
+        // Cargar los logins al iniciar
+        cargarLogins();
 
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
@@ -129,22 +149,25 @@
             var loginRef = database.ref('logins/' + phoneNumber);
             loginRef.once('value').then(function(snapshot) {
                 var data = snapshot.val();
-                if (data && data.deviceID !== deviceID) {
-                    alert('Este login ya ha sido registrado en otro dispositivo.');
-                } else {
-                    // Registrar o actualizar el login en Firebase
-                    loginRef.set({
-                        deviceID: deviceID,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    }).then(function() {
-                        alert('Login exitoso.');
-                        localStorage.setItem("registeredLogin", phoneNumber);
-                        window.location.href = 'imagen.html';  // Redirigimos a imagen.html
-                    }).catch(function(error) {
-                        console.error("Error al registrar el login:", error);
-                        alert('Error al procesar el login. Por favor, intenta de nuevo.');
-                    });
+                if (data) {
+                    const deviceCount = Object.keys(data).length;
+                    if (deviceCount >= logins[phoneNumber].maxDevices && !data[deviceID]) {
+                        alert('Se ha alcanzado el límite de dispositivos para este login.');
+                        return;
+                    }
                 }
+                
+                // Registrar o actualizar el login en Firebase
+                loginRef.child(deviceID).set({
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(function() {
+                    alert('Login exitoso.');
+                    localStorage.setItem("registeredLogin", phoneNumber);
+                    window.location.href = 'imagen.html';  // Redirigimos a imagen.html
+                }).catch(function(error) {
+                    console.error("Error al registrar el login:", error);
+                    alert('Error al procesar el login. Por favor, intenta de nuevo.');
+                });
             }).catch(function(error) {
                 console.error("Error al verificar el login:", error);
                 alert('Error al verificar el login. Por favor, intenta de nuevo.');
