@@ -14,184 +14,85 @@
             background-color: #1f0020;
             font-family: Arial, sans-serif;
         }
-
         .container {
             text-align: center;
         }
-
         .logo img {
             width: 300px;
         }
-
-        .input-container {
+        .input-container, .button-container {
             margin-top: 20px;
         }
-
-        .input-container input {
+        input, button {
             width: 300px;
             padding: 15px;
             font-size: 18px;
             border: none;
             border-radius: 5px;
+        }
+        input {
             background-color: #4d334e;
             color: #fff;
-            outline: none;
-            text-align: center;
         }
-
-        .button-container {
-            margin-top: 20px;
-        }
-
-        .button-container button {
-            width: 300px;
-            padding: 15px;
+        button {
             background-color: #db0082;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
             color: #fff;
             cursor: pointer;
         }
-
-        .button-container button:hover {
-            background-color: #db0082;
+        #debugInfo {
+            margin-top: 20px;
+            color: white;
+            text-align: left;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="logo">
             <img src="https://i.postimg.cc/MHwxYt1F/Picsart-24-10-18-02-45-24-316.jpg" alt="Nequi Logo">
         </div>
-
         <div class="input-container">
             <input type="text" placeholder="Introduce tu código" id="phoneInput" maxlength="10">
         </div>
-
         <div class="button-container">
             <button onclick="entrar()">Entra</button>
         </div>
+        <div id="debugInfo"></div>
     </div>
 
     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJYSDYOCsYCtzl816X_-cCLdwGwDj8_XQ",
-            authDomain: "nequidz-v2.firebaseapp.com",
-            projectId: "nequidz-v2",
-            storageBucket: "nequidz-v2.appspot.com",
-            messagingSenderId: "318211283571",
-            appId: "1:318211283571:web:cc3b2ca16711d52e796806",
-            measurementId: "G-K2422MDNPJ"
+        // Objeto para almacenar los logins
+        let logins = {
+            '3001788752': { name: 'Cris', maxDevices: 1 },
+            '3114567890': { name: 'Juan', maxDevices: 2 },
+            '3007654321': { name: 'Maria', maxDevices: 3 }
         };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-
-        // Obtener referencia a la base de datos
-        var database = firebase.database();
-
-        // Objeto para almacenar los logins
-        let logins = {};
-
-        // Función para cargar los logins desde el archivo
-        async function cargarLogins() {
-            try {
-                const response = await fetch('logins.txt');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                console.log('Contenido del archivo logins.txt:', text); // Log para depuración
-                const lines = text.split('\n');
-                lines.forEach(line => {
-                    if (line.trim() !== '') {
-                        const [name, code, dp] = line.split(':').map(item => item.trim());
-                        if (code && dp) {
-                            logins[code] = {
-                                name: name,
-                                maxDevices: parseInt(dp.split(' ')[1])
-                            };
-                        }
-                    }
-                });
-                console.log('Logins cargados:', logins); // Log para depuración
-            } catch (error) {
-                console.error('Error al cargar los logins:', error);
-                alert('Error al cargar los logins. Por favor, intenta de nuevo más tarde.');
-            }
+        function log(message) {
+            console.log(message);
+            let debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML += message + '<br>';
         }
 
-        // Función para generar un ID único para el dispositivo
-        function getDeviceID() {
-            let deviceID = localStorage.getItem("deviceID");
-            if (!deviceID) {
-                deviceID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
-                localStorage.setItem("deviceID", deviceID);
-            }
-            return deviceID;
-        }
-
-        // Función para manejar el login
-        async function entrar() {
+        function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
-            console.log('Intentando login con:', phoneNumber); // Log para depuración
-            console.log('Logins disponibles:', logins); // Log para depuración
-
-            if (Object.keys(logins).length === 0) {
-                console.log('Recargando logins...'); // Log para depuración
-                await cargarLogins();
-            }
+            log('Intentando login con: ' + phoneNumber);
+            log('Logins disponibles: ' + JSON.stringify(logins));
 
             if (!logins[phoneNumber]) {
+                log('Número incorrecto.');
                 alert('Número incorrecto.');
                 return;
             }
 
-            const deviceID = getDeviceID();
-
-            // Verificar en Firebase si el login ya está registrado
-            var loginRef = database.ref('logins/' + phoneNumber);
-            loginRef.once('value').then(function(snapshot) {
-                var data = snapshot.val();
-                if (data) {
-                    const deviceCount = Object.keys(data).length;
-                    if (deviceCount >= logins[phoneNumber].maxDevices && !data[deviceID]) {
-                        alert('Se ha alcanzado el límite de dispositivos para este login.');
-                        return;
-                    }
-                }
-                
-                // Registrar o actualizar el login en Firebase
-                loginRef.child(deviceID).set({
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                }).then(function() {
-                    alert('Login exitoso.');
-                    localStorage.setItem("registeredLogin", phoneNumber);
-                    window.location.href = 'imagen.html';  // Redirigimos a imagen.html
-                }).catch(function(error) {
-                    console.error("Error al registrar el login:", error);
-                    alert('Error al procesar el login. Por favor, intenta de nuevo.');
-                });
-            }).catch(function(error) {
-                console.error("Error al verificar el login:", error);
-                alert('Error al verificar el login. Por favor, intenta de nuevo.');
-            });
+            log('Login exitoso para: ' + logins[phoneNumber].name);
+            alert('Login exitoso para: ' + logins[phoneNumber].name);
+            // Aquí puedes agregar la lógica para redirigir o hacer lo que necesites después del login exitoso
         }
 
-        // Cargar los logins al iniciar y esperar a que se complete
-        window.onload = async function() {
-            await cargarLogins();
-            const registeredLogin = localStorage.getItem("registeredLogin");
-            if (registeredLogin) {
-                document.getElementById('phoneInput').value = registeredLogin;
-            }
+        window.onload = function() {
+            log('Página cargada. Logins disponibles:');
+            log(JSON.stringify(logins, null, 2));
         };
     </script>
 </body>
