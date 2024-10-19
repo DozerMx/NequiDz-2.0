@@ -75,6 +75,13 @@
     </div>
 
     <script>
+        // Definimos los logins posibles
+        const logins = {
+            '666': true,
+            '123': true,
+            '456': true
+        };
+
         // Función para obtener el valor de una cookie
         function getCookie(name) {
             const value = `; ${document.cookie}`;
@@ -101,34 +108,38 @@
         }
 
         // Función para manejar el login
-        async function entrar() {
+        function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
             const deviceID = getDeviceID();
 
-            // Enviar solicitud POST al servidor para validar el login
-            try {
-                const response = await fetch('https://b64ed5ac-89ba-4805-abfb-b0c6f05585b6-00-35skt0ffyx2qw.worf.replit.dev/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ phoneNumber, deviceId: deviceID })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Si el login es exitoso, lo registramos en las cookies
-                    setCookie("registeredDeviceID", deviceID, 365);
-                    setCookie("deviceLogin", phoneNumber, 365);
-                    alert('Login exitoso.');
-                    window.location.href = 'imagen.html';  // Redirigimos a imagen.html
-                } else {
-                    alert(data.message);  // Mostramos el mensaje de error
-                }
-            } catch (error) {
-                alert('Error al intentar el login: ' + error.message);
+            // Verificamos si el número está en la lista de logins permitidos
+            if (!logins[phoneNumber]) {
+                alert('Número incorrecto.');
+                return;
             }
+
+            // Verificamos si ya hay un login registrado para este dispositivo
+            const registeredLogin = getCookie("registeredLogin");
+
+            if (registeredLogin) {
+                if (registeredLogin !== phoneNumber) {
+                    alert('Este dispositivo ya tiene registrado otro login.');
+                    return;
+                }
+            } else {
+                // Si no hay login registrado, verificamos si este login ya está usado en otro dispositivo
+                const loginDeviceID = getCookie(`login_${phoneNumber}`);
+                if (loginDeviceID && loginDeviceID !== deviceID) {
+                    alert('Este login ya ha sido registrado en otro dispositivo.');
+                    return;
+                }
+            }
+
+            // Si el login es válido y no está usado en otro dispositivo, lo registramos
+            setCookie("registeredLogin", phoneNumber, 365);
+            setCookie(`login_${phoneNumber}`, deviceID, 365);
+            alert('Login exitoso.');
+            window.location.href = 'imagen.html';  // Redirigimos a imagen.html
         }
     </script>
 </body>
