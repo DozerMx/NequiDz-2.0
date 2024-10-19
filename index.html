@@ -14,85 +14,149 @@
             background-color: #1f0020;
             font-family: Arial, sans-serif;
         }
+
         .container {
             text-align: center;
         }
+
         .logo img {
             width: 300px;
         }
-        .input-container, .button-container {
+
+        .input-container {
             margin-top: 20px;
         }
-        input, button {
+
+        .input-container input {
             width: 300px;
             padding: 15px;
             font-size: 18px;
             border: none;
             border-radius: 5px;
-        }
-        input {
             background-color: #4d334e;
             color: #fff;
+            outline: none;
+            text-align: center;
         }
-        button {
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            width: 300px;
+            padding: 15px;
             background-color: #db0082;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
             color: #fff;
             cursor: pointer;
         }
-        #debugInfo {
-            margin-top: 20px;
-            color: white;
-            text-align: left;
+
+        .button-container button:hover {
+            background-color: #db0082;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="logo">
             <img src="https://i.postimg.cc/MHwxYt1F/Picsart-24-10-18-02-45-24-316.jpg" alt="Nequi Logo">
         </div>
+
         <div class="input-container">
             <input type="text" placeholder="Introduce tu código" id="phoneInput" maxlength="10">
         </div>
+
         <div class="button-container">
             <button onclick="entrar()">Entra</button>
         </div>
-        <div id="debugInfo"></div>
     </div>
 
     <script>
-        // Objeto para almacenar los logins
-        let logins = {
-            '3001788752': { name: 'Cris', maxDevices: 1 },
-            '3114567890': { name: 'Juan', maxDevices: 2 },
-            '3007654321': { name: 'Maria', maxDevices: 3 }
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJYSDYOCsYCtzl816X_-cCLdwGwDj8_XQ",
+            authDomain: "nequidz-v2.firebaseapp.com",
+            projectId: "nequidz-v2",
+            storageBucket: "nequidz-v2.appspot.com",
+            messagingSenderId: "318211283571",
+            appId: "1:318211283571:web:cc3b2ca16711d52e796806",
+            measurementId: "G-K2422MDNPJ"
         };
 
-        function log(message) {
-            console.log(message);
-            let debugInfo = document.getElementById('debugInfo');
-            debugInfo.innerHTML += message + '<br>';
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Obtener referencia a la base de datos
+        var database = firebase.database();
+
+        // Definimos los logins posibles
+        const logins = {
+            '3001788752': true,
+            '3006378620': true,
+            '3188383901': true
+        };
+
+        // Función para generar un ID único para el dispositivo
+        function getDeviceID() {
+            let deviceID = localStorage.getItem("deviceID");
+            if (!deviceID) {
+                deviceID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+                localStorage.setItem("deviceID", deviceID);
+            }
+            return deviceID;
         }
 
+        // Función para manejar el login
         function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
-            log('Intentando login con: ' + phoneNumber);
-            log('Logins disponibles: ' + JSON.stringify(logins));
+            const deviceID = getDeviceID();
 
+            // Verificamos si el número está en la lista de logins permitidos
             if (!logins[phoneNumber]) {
-                log('Número incorrecto.');
                 alert('Número incorrecto.');
                 return;
             }
 
-            log('Login exitoso para: ' + logins[phoneNumber].name);
-            alert('Login exitoso para: ' + logins[phoneNumber].name);
-            // Aquí puedes agregar la lógica para redirigir o hacer lo que necesites después del login exitoso
+            // Verificar en Firebase si el login ya está registrado
+            var loginRef = database.ref('logins/' + phoneNumber);
+            loginRef.once('value').then(function(snapshot) {
+                var data = snapshot.val();
+                if (data && data.deviceID !== deviceID) {
+                    alert('Este login ya ha sido registrado en otro dispositivo.');
+                } else {
+                    // Registrar o actualizar el login en Firebase
+                    loginRef.set({
+                        deviceID: deviceID,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }).then(function() {
+                        alert('Login exitoso.');
+                        localStorage.setItem("registeredLogin", phoneNumber);
+                        window.location.href = 'imagen.html';  // Redirigimos a imagen.html
+                    }).catch(function(error) {
+                        console.error("Error al registrar el login:", error);
+                        alert('Error al procesar el login. Por favor, intenta de nuevo.');
+                    });
+                }
+            }).catch(function(error) {
+                console.error("Error al verificar el login:", error);
+                alert('Error al verificar el login. Por favor, intenta de nuevo.');
+            });
         }
 
+        // Verificamos el estado del login al cargar la página
         window.onload = function() {
-            log('Página cargada. Logins disponibles:');
-            log(JSON.stringify(logins, null, 2));
+            const registeredLogin = localStorage.getItem("registeredLogin");
+            if (registeredLogin) {
+                document.getElementById('phoneInput').value = registeredLogin;
+            }
         };
     </script>
 </body>
