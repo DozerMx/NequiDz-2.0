@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escribe tu clave</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1f0020;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .password-boxes {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .password-box {
+            width: 40px;
+            height: 40px;
+            background-color: #3d1459;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: pink;
+        }
+        .message {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .key {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .key:active {
+            transform: scale(1.1);
+            color: #ff80ff;
+        }
+        .key:focus {
+            outline: none;
+        }
+        .key:active {
+            border: none;
+            box-shadow: 0 0 5px 2px rgba(255, 128, 255, 0.5);
+        }
+        .forgot {
+            margin-top: 20px;
+            font-size: 14px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .back-arrow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+        }
+        .back-arrow img {
+            width: 50px; /* Ajustamos el tamaño de la imagen */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Aquí cambiamos la flecha por la imagen -->
+    <div class="back-arrow" onclick="window.history.back();">
+        <img src="https://i.ibb.co/FBr2xh6/Picsart-24-10-20-20-45-27-992.png" alt="Flecha atrás">
+    </div>
+    <div class="container">
+        <h1>Escribe tu clave</h1>
+        <div class="password-boxes">
+            <div class="password-box"></div>
+            <div class="password-box"></div>
+            <div class="password-box"></div>
+            <div class="password-box"></div>
+        </div>
+        <p class="message">No dudamos que seas tú...<br>Pero es mejor confirmar ;)</p>
+        <div class="keypad">
+            <button class="key" onclick="addDigit('1')">1</button>
+            <button class="key" onclick="addDigit('2')">2</button>
+            <button class="key" onclick="addDigit('3')">3</button>
+            <button class="key" onclick="addDigit('4')">4</button>
+            <button class="key" onclick="addDigit('5')">5</button>
+            <button class="key" onclick="addDigit('6')">6</button>
+            <button class="key" onclick="addDigit('7')">7</button>
+            <button class="key" onclick="addDigit('8')">8</button>
+            <button class="key" onclick="addDigit('9')">9</button>
+            <button class="key"></button>
+            <button class="key" onclick="addDigit('0')">0</button>
+            <button class="key" onclick="removeDigit()">×</button>
+        </div>
+        <p class="forgot">¿Se te olvidó?</p>
+    </div>
+
+    <script>
+        let password = '';
+        const boxes = document.querySelectorAll('.password-box');
+
+        function addDigit(digit) {
+            if (password.length < 4) {
+                password += digit;
+                updateDisplay();
+            }
+        }
+
+        function removeDigit() {
+            password = password.slice(0, -1);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            boxes.forEach((box, index) => {
+                if (index < password.length) {
+                    box.textContent = '*';
+                } else {
+                    box.textContent = '';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
