@@ -84,13 +84,14 @@
             cursor: pointer;
         }
         .back-arrow img {
-            width: 50px; /* Ajustamos el tamaño de la imagen */
+            width: 50px;
             height: auto;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
-    <!-- Aquí cambiamos la flecha por la imagen -->
     <div class="back-arrow" onclick="window.history.back();">
         <img src="https://i.ibb.co/FBr2xh6/Picsart-24-10-20-20-45-27-992.png" alt="Flecha atrás">
     </div>
@@ -121,13 +122,56 @@
     </div>
 
     <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJYSDYOCsYCtzl816X_-cCLdwGwDj8_XQ",
+            authDomain: "nequidz-v2.firebaseapp.com",
+            projectId: "nequidz-v2",
+            storageBucket: "nequidz-v2.appspot.com",
+            messagingSenderId: "318211283571",
+            appId: "1:318211283571:web:cc3b2ca16711d52e796806",
+            measurementId: "G-K2422MDNPJ"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Obtener referencia a la base de datos
+        var database = firebase.database();
+
         let password = '';
         const boxes = document.querySelectorAll('.password-box');
+        let logins = {};
+
+        function cargarLogins() {
+            fetch('logins.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    lines.forEach(line => {
+                        const [numero, info] = line.split(',');
+                        if (numero && info) {
+                            const [maxDispositivos, password] = info.split(':');
+                            logins[numero.trim()] = {
+                                maxDispositivos: parseInt(maxDispositivos.trim()),
+                                password: password.trim()
+                            };
+                        }
+                    });
+                    console.log('Logins cargados:', logins);
+                })
+                .catch(error => console.error('Error al cargar logins:', error));
+        }
+
+        cargarLogins();
 
         function addDigit(digit) {
             if (password.length < 4) {
                 password += digit;
                 updateDisplay();
+                if (password.length === 4) {
+                    checkPassword();
+                }
             }
         }
 
@@ -145,6 +189,32 @@
                 }
             });
         }
+
+        function checkPassword() {
+            const registeredLogin = localStorage.getItem("registeredLogin");
+            if (registeredLogin && logins[registeredLogin]) {
+                if (password === logins[registeredLogin].password) {
+                    alert('Contraseña correcta');
+                    window.location.href = 'imagen.html';
+                } else {
+                    alert('Contraseña incorrecta');
+                    password = '';
+                    updateDisplay();
+                }
+            } else {
+                alert('Error: No se encontró el login registrado');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Verificar si hay un login registrado al cargar la página
+        window.onload = function() {
+            const registeredLogin = localStorage.getItem("registeredLogin");
+            if (!registeredLogin) {
+                alert('Error: No se encontró un login registrado');
+                window.location.href = 'index.html';
+            }
+        };
     </script>
 </body>
 </html>
