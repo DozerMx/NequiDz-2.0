@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante 2</title>
+    <style>
+        @font-face {
+            font-family: 'Manrope';
+            src: url('/storage/emulated/0/Manrope-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Manrope';
+            src: url('/storage/emulated/0/Manrope-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+        }
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            font-family: 'Manrope', sans-serif;
+        }
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+        .container img {
+            width: 100%;
+            height: auto;
+        }
+        .texto {
+            position: absolute;
+            color: #1e001e;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        #nombre { top: 29%; left: 11.5%; }
+        #numero { top: 40.5%; left: 11.5%; }
+        #cuanto { top: 35%; left: 11.5%; }
+        #fecha { top: 46.2%; left: 11.5%; }
+        #referencia { 
+            top: 19%; 
+            left: 38%; 
+            font-size: 19px;
+            font-weight: 700; /* Mantenemos el grosor en 700 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/storage/emulated/0/comprobante.png" alt="Comprobante 2">
+        <div id="nombre" class="texto"></div>
+        <div id="numero" class="texto"></div>
+        <div id="cuanto" class="texto"></div>
+        <div id="fecha" class="texto"></div>
+        <div id="referencia" class="texto"></div>
+    </div>
+
+    <script>
+        function obtenerParametro(nombre) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(nombre);
+        }
+
+        function formatearNumero(numero) {
+            return numero.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+        }
+
+        function formatearDinero(valor) {
+            const numero = parseFloat(valor);
+            if (isNaN(numero)) {
+                return 'Valor inválido';
+            }
+            const partes = numero.toFixed(2).split('.');
+            const entero = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return `$ ${entero},${partes[1]}`;
+        }
+
+        function obtenerFechaHora() {
+            const fecha = new Date();
+            const opciones = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            };
+            return fecha.toLocaleDateString('es-CO', opciones).replace(',', ' a las');
+        }
+
+        function generarReferencia() {
+            return 'M' + Math.random().toString().substr(2, 7);
+        }
+
+        document.getElementById('nombre').textContent = obtenerParametro('nombre');
+        document.getElementById('numero').textContent = formatearNumero(obtenerParametro('numero'));
+        document.getElementById('cuanto').textContent = formatearDinero(obtenerParametro('cuanto'));
+        document.getElementById('fecha').textContent = obtenerFechaHora();
+        document.getElementById('referencia').textContent = generarReferencia();
+    </script>
+</body>
+</html>

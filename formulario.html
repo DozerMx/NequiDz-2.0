@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope&display=swap" rel="stylesheet">
     <style>
         body, html {
             height: 100%;
@@ -23,7 +24,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -54,6 +55,10 @@
             <input type="text" id="nombre" placeholder="Nombre" required>
             <input type="text" id="numero" placeholder="Número" required>
             <input type="text" id="cuanto" placeholder="Cuánto" required>
+            <select id="tipoComprobante">
+                <option value="1">Comprobante 1</option>
+                <option value="2">Comprobante 2</option>
+            </select>
             <button type="button" onclick="generarComprobante()">GENERAR COMPROBANTE🧸</button>
         </form>
     </div>
@@ -63,10 +68,16 @@
             const nombre = document.getElementById('nombre').value;
             const numero = document.getElementById('numero').value;
             const cuanto = document.getElementById('cuanto').value;
+            const tipoComprobante = document.getElementById('tipoComprobante').value;
 
             if (nombre && numero && cuanto) {
-                // Redirige a la página del comprobante con los datos en la URL
-                window.location.href = `comprobante.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
+                if (tipoComprobante === "1") {
+                    // Redirige a la página del comprobante 1 con los datos en la URL
+                    window.location.href = `comprobante.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
+                } else if (tipoComprobante === "2") {
+                    // Redirige a la página del comprobante 2 con los datos en la URL
+                    window.location.href = `comprobante2.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
+                }
             } else {
                 alert('Por favor, completa todos los campos.');
             }
