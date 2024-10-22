@@ -65,22 +65,78 @@
     </div>
 
     <script>
+        // Función para generar un nuevo número de referencia
+        function generarNuevaReferencia() {
+            let numerosAleatorios = '';
+            for (let i = 0; i < 7; i++) {
+                numerosAleatorios += Math.floor(Math.random() * 10);
+            }
+            return 'M' + numerosAleatorios;
+        }
+
+        // Función para obtener la fecha y hora actual formateada
+        function obtenerFechaHoraActual() {
+            const fecha = new Date();
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            
+            const dia = fecha.getDate();
+            const mes = meses[fecha.getMonth()];
+            const anio = fecha.getFullYear();
+            let hora = fecha.getHours();
+            const minutos = fecha.getMinutes().toString().padStart(2, '0');
+            const ampm = hora >= 12 ? 'p. m.' : 'a. m.';
+            
+            hora = hora % 12;
+            hora = hora ? hora : 12;
+
+            return `${dia} de ${mes} de ${anio} a las ${hora}:${minutos} ${ampm}`;
+        }
+
         function generarComprobante() {
             const nombre = document.getElementById('nombre').value;
             const numero = document.getElementById('numero').value;
             const cuanto = document.getElementById('cuanto').value;
             const tipoComprobante = document.getElementById('tipoComprobante').value;
 
-            if (nombre && numero && cuanto) {
-                if (tipoComprobante === "1") {
-                    window.location.href = `comprobante.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
-                } else if (tipoComprobante === "2") {
-                    window.location.href = `comprobante2.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
-                } else if (tipoComprobante === "3") {
-                    window.location.href = `comprobante3.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
-                }
-            } else {
+            if (!nombre || !numero || !cuanto) {
                 alert('Por favor, completa todos los campos.');
+                return;
+            }
+
+            // Verificar si los datos han cambiado
+            const datosActuales = `${nombre}-${numero}-${cuanto}`;
+            const datosAnteriores = localStorage.getItem('datosComprobante');
+
+            if (datosActuales !== datosAnteriores) {
+                // Si los datos son diferentes, generar nueva referencia y hora
+                const nuevaReferencia = generarNuevaReferencia();
+                const nuevaFechaHora = obtenerFechaHoraActual();
+                
+                // Guardar los nuevos datos
+                localStorage.setItem('datosComprobante', datosActuales);
+                localStorage.setItem('referenciaComprobante', nuevaReferencia);
+                localStorage.setItem('fechaHoraComprobante', nuevaFechaHora);
+            }
+
+            // Obtener la referencia y fecha/hora almacenadas
+            const referencia = localStorage.getItem('referenciaComprobante');
+            const fechaHora = localStorage.getItem('fechaHoraComprobante');
+
+            // Redirigir con todos los parámetros
+            const params = new URLSearchParams({
+                nombre: nombre,
+                numero: numero,
+                cuanto: cuanto,
+                referencia: referencia,
+                fechaHora: fechaHora
+            });
+
+            if (tipoComprobante === "1") {
+                window.location.href = `comprobante.html?${params}`;
+            } else if (tipoComprobante === "2") {
+                window.location.href = `comprobante2.html?${params}`;
+            } else if (tipoComprobante === "3") {
+                window.location.href = `comprobante3.html?${params}`;
             }
         }
     </script>
