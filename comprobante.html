@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comprobante</title>
-
-    <!-- Incluir la fuente Manrope desde Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400&display=swap" rel="stylesheet">
-
     <style>
         body, html {
             height: 100%;
@@ -33,10 +30,9 @@
             position: absolute;
             color: #1e001e;
             font-size: 16.5px;
-            font-weight: 400; /* Manrope Regular */
+            font-weight: 400;
         }
 
-        /* Ajusta las posiciones de los textos en la imagen */
         .nombre {
             top: 22%;
             left: 8.5%;
@@ -53,25 +49,24 @@
         }
 
         .cuanto-dos {
-            top: 64%; /* Ubicación ligeramente por debajo del primer valor */
+            top: 64%;
             left: 20%;
-            font-size: 14.5px; /* Tamaño más grande para el segundo valor */
-            color: #646464; /* Color gris para el segundo valor */
+            font-size: 14.5px;
+            color: #646464;
         }
 
         .referencia {
-            top: 29%; /* Ajusta según necesites la posición del número de referencia */
+            top: 29%;
             left: 8.5%;
         }
 
         .fechaHora {
-            top: 44%; /* Ajusta según necesites la posición de la fecha y hora */
+            top: 44%;
             left: 8.5%;
         }
 
-        /* Estilo para los centavos más pequeños */
         .centavos {
-            font-size: 12px; /* Tamaño más pequeño para los centavos */
+            font-size: 12px;
         }
     </style>
 </head>
@@ -81,72 +76,41 @@
         <div class="nombre" id="nombreTexto"></div>
         <div class="numero" id="numeroTexto"></div>
         <div class="cuanto" id="cuantoTexto"></div>
-        <div class="cuanto-dos" id="cuantoTextoDos"></div> <!-- Segundo valor -->
+        <div class="cuanto-dos" id="cuantoTextoDos"></div>
         <div class="referencia" id="referenciaTexto"></div>
         <div class="fechaHora" id="fechaHoraTexto"></div>
     </div>
 
     <script>
-        // Obtén los parámetros de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const nombre = urlParams.get('nombre');
         const numero = urlParams.get('numero');
         const cuanto = urlParams.get('cuanto');
+        const referencia = urlParams.get('referencia');
+        const fechaHora = urlParams.get('fechaHora');
 
-        // Función para generar el número de referencia aleatorio
-        function generarReferencia() {
-            let numerosAleatorios = '';
-            for (let i = 0; i < 7; i++) {
-                numerosAleatorios += Math.floor(Math.random() * 10); // Genera un número aleatorio de 0 a 9
-            }
-            return 'M' + numerosAleatorios; // Concatenar con 'M'
-        }
-
-        // Función para formatear el valor de "cuánto" en formato $ xx.xxx,00 y aplicar los estilos especiales
         function formatearDinero(valor, conEstilo = false) {
             const formateado = new Intl.NumberFormat('es-CO', {
                 style: 'currency',
                 currency: 'COP',
                 minimumFractionDigits: 2
             }).format(valor);
-            let valorFormateado = formateado.replace('COP', '').trim(); // Elimina el "COP"
+            let valorFormateado = formateado.replace('COP', '').trim();
             
-            // Si se requiere aplicar estilo a los centavos
             if (conEstilo) {
-                // Dividir la parte entera y los centavos
                 const partes = valorFormateado.split(',');
                 return `${partes[0]},<span class="centavos">${partes[1]}</span>`;
             } else {
-                return valorFormateado; // Devolver el valor normal
+                return valorFormateado;
             }
         }
 
-        // Función para obtener la fecha y hora en el formato requerido
-        function obtenerFechaHora() {
-            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-            const fecha = new Date();
-
-            const dia = fecha.getDate();
-            const mes = meses[fecha.getMonth()];
-            const anio = fecha.getFullYear();
-
-            let hora = fecha.getHours();
-            const minutos = fecha.getMinutes().toString().padStart(2, '0'); // Para agregar ceros a la izquierda si es necesario
-            const ampm = hora >= 12 ? 'p.m.' : 'a.m.';
-
-            hora = hora % 12;
-            hora = hora ? hora : 12; // Si la hora es 0, mostrar 12
-
-            return `${dia} de ${mes} de ${anio}, ${hora}:${minutos} ${ampm}`;
-        }
-
-        // Inserta los valores en la página
         document.getElementById('nombreTexto').innerText = nombre;
         document.getElementById('numeroTexto').innerText = numero;
-        document.getElementById('cuantoTexto').innerText = formatearDinero(cuanto); // Aplica el formato a "cuánto" (primera instancia)
-        document.getElementById('cuantoTextoDos').innerHTML = formatearDinero(cuanto, true); // Aplica el formato a "cuánto" (segunda instancia con estilos)
-        document.getElementById('referenciaTexto').innerText = generarReferencia(); // Añade el número de referencia
-        document.getElementById('fechaHoraTexto').innerText = obtenerFechaHora(); // Añade la fecha y hora actual
+        document.getElementById('cuantoTexto').innerText = formatearDinero(cuanto);
+        document.getElementById('cuantoTextoDos').innerHTML = formatearDinero(cuanto, true);
+        document.getElementById('referenciaTexto').innerText = referencia;
+        document.getElementById('fechaHoraTexto').innerText = fechaHora;
     </script>
 </body>
 </html>
