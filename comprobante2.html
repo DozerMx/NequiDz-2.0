@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -50,7 +49,7 @@
             top: 19%; 
             left: 38%; 
             font-size: 19px;
-            font-weight: 700; /* Mantenemos el grosor en 700 */
+            font-weight: 700;
         }
     </style>
 </head>
@@ -65,10 +64,12 @@
     </div>
 
     <script>
-        function obtenerParametro(nombre) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(nombre);
-        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const nombre = urlParams.get('nombre');
+        const numero = urlParams.get('numero');
+        const cuanto = urlParams.get('cuanto');
+        const referencia = urlParams.get('referencia');
+        const fechaHora = urlParams.get('fechaHora');
 
         function formatearNumero(numero) {
             return numero.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
@@ -84,28 +85,11 @@
             return `$ ${entero},${partes[1]}`;
         }
 
-        function obtenerFechaHora() {
-            const fecha = new Date();
-            const opciones = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true 
-            };
-            return fecha.toLocaleDateString('es-CO', opciones).replace(',', ' a las');
-        }
-
-        function generarReferencia() {
-            return 'M' + Math.random().toString().substr(2, 7);
-        }
-
-        document.getElementById('nombre').textContent = obtenerParametro('nombre');
-        document.getElementById('numero').textContent = formatearNumero(obtenerParametro('numero'));
-        document.getElementById('cuanto').textContent = formatearDinero(obtenerParametro('cuanto'));
-        document.getElementById('fecha').textContent = obtenerFechaHora();
-        document.getElementById('referencia').textContent = generarReferencia();
+        document.getElementById('nombre').textContent = nombre;
+        document.getElementById('numero').textContent = formatearNumero(numero);
+        document.getElementById('cuanto').textContent = formatearDinero(cuanto);
+        document.getElementById('fecha').textContent = fechaHora;
+        document.getElementById('referencia').textContent = referencia;
     </script>
 </body>
 </html>
