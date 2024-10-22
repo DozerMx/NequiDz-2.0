@@ -89,6 +89,10 @@
         const referencia = urlParams.get('referencia');
         const fechaHora = urlParams.get('fechaHora');
 
+        function formatearNumero(numero) {
+            return numero.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+        }
+
         function formatearDinero(valor, conEstilo = false) {
             const formateado = new Intl.NumberFormat('es-CO', {
                 style: 'currency',
@@ -106,7 +110,7 @@
         }
 
         document.getElementById('nombreTexto').innerText = nombre;
-        document.getElementById('numeroTexto').innerText = numero;
+        document.getElementById('numeroTexto').innerText = formatearNumero(numero); // Aplicamos el formateo aquí
         document.getElementById('cuantoTexto').innerText = formatearDinero(cuanto);
         document.getElementById('cuantoTextoDos').innerHTML = formatearDinero(cuanto, true);
         document.getElementById('referenciaTexto').innerText = referencia;
