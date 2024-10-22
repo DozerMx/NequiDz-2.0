@@ -58,6 +58,7 @@
             <select id="tipoComprobante">
                 <option value="1">Comprobante 1</option>
                 <option value="2">Comprobante 2</option>
+                <option value="3">Comprobante 3</option>
             </select>
             <button type="button" onclick="generarComprobante()">GENERAR COMPROBANTE🧸</button>
         </form>
@@ -72,11 +73,11 @@
 
             if (nombre && numero && cuanto) {
                 if (tipoComprobante === "1") {
-                    // Redirige a la página del comprobante 1 con los datos en la URL
                     window.location.href = `comprobante.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
                 } else if (tipoComprobante === "2") {
-                    // Redirige a la página del comprobante 2 con los datos en la URL
                     window.location.href = `comprobante2.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
+                } else if (tipoComprobante === "3") {
+                    window.location.href = `comprobante3.html?nombre=${encodeURIComponent(nombre)}&numero=${encodeURIComponent(numero)}&cuanto=${encodeURIComponent(cuanto)}`;
                 }
             } else {
                 alert('Por favor, completa todos los campos.');
