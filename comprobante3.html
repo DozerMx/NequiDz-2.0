@@ -86,14 +86,8 @@
         const nombre = urlParams.get('nombre');
         const numero = urlParams.get('numero');
         const cuanto = urlParams.get('cuanto');
-
-        function generarReferencia() {
-            let numerosAleatorios = '';
-            for (let i = 0; i < 7; i++) {
-                numerosAleatorios += Math.floor(Math.random() * 10);
-            }
-            return 'M' + numerosAleatorios;
-        }
+        const referencia = urlParams.get('referencia');
+        const fechaHora = urlParams.get('fechaHora');
 
         function formatearDinero(valor, conEstilo = false) {
             const formateado = new Intl.NumberFormat('es-CO', {
@@ -111,30 +105,12 @@
             }
         }
 
-        function obtenerFechaHora() {
-            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-            const fecha = new Date();
-
-            const dia = fecha.getDate();
-            const mes = meses[fecha.getMonth()];
-            const anio = fecha.getFullYear();
-
-            let hora = fecha.getHours();
-            const minutos = fecha.getMinutes().toString().padStart(2, '0');
-            const ampm = hora >= 12 ? 'p. m.' : 'a. m.';
-
-            hora = hora % 12;
-            hora = hora ? hora : 12;
-
-            return `${dia} de ${mes} de ${anio} a las ${hora}:${minutos} ${ampm}`;
-        }
-
         document.getElementById('nombreTexto').innerText = nombre;
         document.getElementById('numeroTexto').innerText = numero;
         document.getElementById('cuantoTexto').innerText = formatearDinero(cuanto);
         document.getElementById('cuantoTextoDos').innerHTML = formatearDinero(cuanto, true);
-        document.getElementById('referenciaTexto').innerText = generarReferencia();
-        document.getElementById('fechaHoraTexto').innerText = obtenerFechaHora();
+        document.getElementById('referenciaTexto').innerText = referencia;
+        document.getElementById('fechaHoraTexto').innerText = fechaHora;
     </script>
 </body>
 </html>
