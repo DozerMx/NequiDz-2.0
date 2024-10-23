@@ -173,25 +173,25 @@
         let logins = {};
 
         // Función para cargar los logins desde el archivo
-        function cargarLogins() {
-            fetch('logins.txt')
-                .then(response => response.text())
-                .then(data => {
-                    const lines = data.split('\n');
-                    lines.forEach(line => {
-                        const [numero, info] = line.split(',');
-                        if (numero && info) {
-                            const [maxDispositivos, password] = info.split(':');
-                            logins[numero.trim()] = {
-                                maxDispositivos: parseInt(maxDispositivos.trim()),
-                                password: password.trim()
-                            };
-                        }
-                    });
-                    console.log('Logins cargados:', logins);
-                })
-                .catch(error => console.error('Error al cargar logins:', error));
-        }
+function cargarLogins() {
+    fetch('logins.txt')
+        .then(response => response.text())
+        .then(data => {
+            const lines = data.split('\n');
+            lines.forEach(line => {
+                const [numero, info] = line.split(',');
+                if (numero && info) {
+                    const [maxDispositivos, password] = info.split(':');
+                    logins[numero.trim()] = {
+                        maxDispositivos: parseInt(maxDispositivos.trim()), // Convertir a número
+                        password: password.trim()
+                    };
+                }
+            });
+            console.log('Logins cargados:', logins);
+        })
+        .catch(error => console.error('Error al cargar logins:', error));
+}
 
         // Llamar a la función para cargar los logins al iniciar
         cargarLogins();
