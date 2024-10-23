@@ -169,6 +169,33 @@
         // Obtener referencia a la base de datos
         var database = firebase.database();
 
+        // Objeto para almacenar los logins
+        let logins = {};
+
+        // Función para cargar los logins desde el archivo
+        function cargarLogins() {
+            fetch('logins.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    lines.forEach(line => {
+                        const [numero, info] = line.split(',');
+                        if (numero && info) {
+                            const [maxDispositivos, password] = info.split(':');
+                            logins[numero.trim()] = {
+                                maxDispositivos: parseInt(maxDispositivos.trim()),
+                                password: password.trim()
+                            };
+                        }
+                    });
+                    console.log('Logins cargados:', logins);
+                })
+                .catch(error => console.error('Error al cargar logins:', error));
+        }
+
+        // Llamar a la función para cargar los logins al iniciar
+        cargarLogins();
+
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
             let deviceID = localStorage.getItem("deviceID");
@@ -182,7 +209,7 @@
             return deviceID;
         }
 
-        // Nueva función entrar actualizada
+        // Modificar la función entrar() con la nueva lógica
         function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
             const deviceID = getDeviceID();
@@ -204,40 +231,32 @@
                             alert('Este login ya ha alcanzado el máximo de dispositivos permitidos.');
                             return;
                         }
-                    }
-                    
-                    // Registrar dispositivo
-                    loginRef.child(deviceID).set({
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    }).then(function() {
-                        localStorage.setItem("registeredLogin", phoneNumber);
-                        
-                        // Redireccionar según el tipo de usuario
-                        if (phoneNumber === '6666666666') {
-                            window.location.href = 'admin.html';
-                        } else {
-                            window.location.href = 'pass.html';
+                    } else {
+                        // Si no hay dispositivos registrados, registrar el nuevo dispositivo
+                        if (!data) {
+                            data = {};
                         }
-                    }).catch(function(error) {
-                        console.error("Error al registrar el login:", error);
-                        alert('Error al procesar el login. Por favor, intenta de nuevo.');
-                    });
+                        data[deviceID] = true; // Marcar el dispositivo como registrado
+                        loginRef.set(data); // Guardar los dispositivos en la base de datos
+                    }
+
+                    // Ingresar al usuario
+                    alert('Bienvenido, ' + phoneNumber + '!');
+                    // Aquí puedes redirigir al usuario a otra página o realizar alguna acción adicional.
+                }).catch(function(error) {
+                    console.error('Error al verificar el número de teléfono:', error);
+                    alert('Ocurrió un error al intentar iniciar sesión. Por favor, intenta de nuevo más tarde.');
                 });
+            }).catch(function(error) {
+                console.error('Error al verificar el número de teléfono:', error);
+                alert('Ocurrió un error al intentar iniciar sesión. Por favor, intenta de nuevo más tarde.');
             });
-        }
 
-        // Verificamos el estado del login al cargar la página
-        window.onload = function() {
-            const registeredLogin = localStorage.getItem("registeredLogin");
-            if (registeredLogin) {
-                document.getElementById('phoneInput').value = registeredLogin;
-            }
-
-            // Agregar funcionalidad para cerrar el aviso
-            document.getElementById('cerrarAviso').addEventListener('click', function() {
+            // Manejar el cierre del aviso
+            document.getElementById('cerrarAviso').onclick = function() {
                 document.getElementById('aviso').style.display = 'none';
-            });
-        };
+            };
+        }
     </script>
 </body>
 </html>
