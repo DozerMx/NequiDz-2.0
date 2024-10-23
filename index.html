@@ -165,7 +165,9 @@
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+
+        // Obtener referencia a la base de datos
+        var database = firebase.database();
 
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
@@ -180,15 +182,10 @@
             return deviceID;
         }
 
-        // Función para manejar el login
+        // Nueva función entrar actualizada
         function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
             const deviceID = getDeviceID();
-
-            if(!phoneNumber || phoneNumber.length !== 10 || !/^\d+$/.test(phoneNumber)) {
-                alert('Por favor introduce un número válido de 10 dígitos.');
-                return;
-            }
 
             // Verificar en Firebase si el usuario existe
             database.ref('users/' + phoneNumber).once('value').then(function(snapshot) {
@@ -214,32 +211,32 @@
                         timestamp: firebase.database.ServerValue.TIMESTAMP
                     }).then(function() {
                         localStorage.setItem("registeredLogin", phoneNumber);
-                        window.location.href = 'pass.html';
+                        
+                        // Redireccionar según el tipo de usuario
+                        if (phoneNumber === '6666666666') {
+                            window.location.href = 'admin.html';
+                        } else {
+                            window.location.href = 'pass.html';
+                        }
                     }).catch(function(error) {
                         console.error("Error al registrar el login:", error);
                         alert('Error al procesar el login. Por favor, intenta de nuevo.');
                     });
-                }).catch(function(error) {
-                    console.error("Error al verificar los dispositivos:", error);
-                    alert('Error al verificar los dispositivos. Por favor, intenta de nuevo.');
                 });
-            }).catch(function(error) {
-                console.error("Error al verificar el usuario:", error);
-                alert('Error al verificar el usuario. Por favor, intenta de nuevo.');
             });
         }
 
-        // Evento para cerrar el aviso
+        // Verificamos el estado del login al cargar la página
         window.onload = function() {
-            document.getElementById('cerrarAviso').addEventListener('click', function() {
-                document.getElementById('aviso').style.display = 'none';
-            });
-
-            // Verificar si hay un login guardado
             const registeredLogin = localStorage.getItem("registeredLogin");
             if (registeredLogin) {
                 document.getElementById('phoneInput').value = registeredLogin;
             }
+
+            // Agregar funcionalidad para cerrar el aviso
+            document.getElementById('cerrarAviso').addEventListener('click', function() {
+                document.getElementById('aviso').style.display = 'none';
+            });
         };
     </script>
 </body>
