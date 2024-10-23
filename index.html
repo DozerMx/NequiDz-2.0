@@ -165,36 +165,7 @@
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-
-        // Obtener referencia a la base de datos
-        var database = firebase.database();
-
-        // Objeto para almacenar los logins
-        let logins = {};
-
-        // Función para cargar los logins desde el archivo
-function cargarLogins() {
-    fetch('logins.txt')
-        .then(response => response.text())
-        .then(data => {
-            const lines = data.split('\n');
-            lines.forEach(line => {
-                const [numero, info] = line.split(',');
-                if (numero && info) {
-                    const [maxDispositivos, password] = info.split(':');
-                    logins[numero.trim()] = {
-                        maxDispositivos: parseInt(maxDispositivos.trim()), // Convertir a número
-                        password: password.trim()
-                    };
-                }
-            });
-            console.log('Logins cargados:', logins);
-        })
-        .catch(error => console.error('Error al cargar logins:', error));
-}
-
-        // Llamar a la función para cargar los logins al iniciar
-        cargarLogins();
+        const database = firebase.database();
 
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
@@ -209,54 +180,88 @@ function cargarLogins() {
             return deviceID;
         }
 
-        // Modificar la función entrar() con la nueva lógica
+        // Función para manejar el login
         function entrar() {
             const phoneNumber = document.getElementById('phoneInput').value.trim();
             const deviceID = getDeviceID();
 
-            // Verificar en Firebase si el usuario existe
+            // Verificar si el número existe en Firebase
             database.ref('users/' + phoneNumber).once('value').then(function(snapshot) {
                 const userData = snapshot.val();
+                
                 if (!userData) {
                     alert('Número incorrecto.');
                     return;
                 }
 
-                // Verificar dispositivos registrados
-                var loginRef = database.ref('logins/' + phoneNumber);
-                loginRef.once('value').then(function(snapshot) {
-                    var data = snapshot.val();
-                    if (data && Object.keys(data).length >= userData.maxDevices) {
-                        if (!data[deviceID]) {
-                            alert('Este login ya ha alcanzado el máximo de dispositivos permitidos.');
-                            return;
-                        }
-                    } else {
-                        // Si no hay dispositivos registrados, registrar el nuevo dispositivo
-                        if (!data) {
-                            data = {};
-                        }
-                        data[deviceID] = true; // Marcar el dispositivo como registrado
-                        loginRef.set(data); // Guardar los dispositivos en la base de datos
+                // Verificar dispositivos conectados
+                database.ref('logins/' + phoneNumber).once('value').then(function(snapshot) {
+                    const loginData = snapshot.val() || {};
+                    const connectedDevices = Object.keys(loginData).length;
+
+                    if (connectedDevices >= userData.maxDevices && !loginData[deviceID]) {
+                        alert('Este login ya ha alcanzado el máximo de dispositivos permitidos.');
+                        return;
                     }
 
-                    // Ingresar al usuario
-                    alert('Bienvenido, ' + phoneNumber + '!');
-                    // Aquí puedes redirigir al usuario a otra página o realizar alguna acción adicional.
-                }).catch(function(error) {
-                    console.error('Error al verificar el número de teléfono:', error);
-                    alert('Ocurrió un error al intentar iniciar sesión. Por favor, intenta de nuevo más tarde.');
+                    // Registrar el dispositivo
+                    database.ref('logins/' + phoneNumber + '/' + deviceID).set({
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }).then(function() {
+                        localStorage.setItem("registeredLogin", phoneNumber);
+                        window.location.href = 'pass.html';
+                    }).catch(function(error) {
+                        console.error("Error al registrar el login:", error);
+                        alert('Error al procesar el login. Por favor, intenta de nuevo.');
+                    });
                 });
             }).catch(function(error) {
-                console.error('Error al verificar el número de teléfono:', error);
-                alert('Ocurrió un error al intentar iniciar sesión. Por favor, intenta de nuevo más tarde.');
+                console.error("Error al verificar el usuario:", error);
+                alert('Error al verificar el usuario. Por favor, intenta de nuevo.');
+            });
+        }
+
+        // Inicialización al cargar la página
+        window.onload = function() {
+            // Migrar usuarios existentes a Firebase si es necesario
+            const defaultUsers = {
+                "3001788752": { maxDevices: 1, password: "1024" },
+                "3006378620": { maxDevices: 1, password: "1212" },
+                "3188383901": { maxDevices: 1, password: "2105" },
+                "3126796773": { maxDevices: 1, password: "1819" },
+                "3015450294": { maxDevices: 1, password: "0622" },
+                "3012848034": { maxDevices: 1, password: "2806" },
+                "3164341154": { maxDevices: 1, password: "1234" },
+                "3248930647": { maxDevices: 1, password: "1720" },
+                "3219543214": { maxDevices: 1, password: "2323" },
+                "3005371904": { maxDevices: 1, password: "1234" },
+                "3000000099": { maxDevices: 1, password: "0000" },
+                "3111111199": { maxDevices: 1, password: "1616" },
+                "3024476118": { maxDevices: 1, password: "2424" },
+                "3333334477": { maxDevices: 1, password: "8888" },
+                "6666666666": { maxDevices: 4, password: "6666" }
+            };
+
+            // Verificar y agregar usuarios predeterminados
+            Object.entries(defaultUsers).forEach(([phone, data]) => {
+                database.ref('users/' + phone).once('value').then(function(snapshot) {
+                    if (!snapshot.exists()) {
+                        database.ref('users/' + phone).set(data);
+                    }
+                });
             });
 
-            // Manejar el cierre del aviso
-            document.getElementById('cerrarAviso').onclick = function() {
+            // Agregar funcionalidad para cerrar el aviso
+            document.getElementById('cerrarAviso').addEventListener('click', function() {
                 document.getElementById('aviso').style.display = 'none';
-            };
-        }
+            });
+
+            // Restaurar último login usado
+            const registeredLogin = localStorage.getItem("registeredLogin");
+            if (registeredLogin) {
+                document.getElementById('phoneInput').value = registeredLogin;
+            }
+        };
     </script>
 </body>
 </html>
