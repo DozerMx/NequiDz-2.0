@@ -165,36 +165,7 @@
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-
-        // Obtener referencia a la base de datos
-        var database = firebase.database();
-
-        // Objeto para almacenar los logins
-        let logins = {};
-
-        // Función para cargar los logins desde el archivo
-        function cargarLogins() {
-            fetch('logins.txt')
-                .then(response => response.text())
-                .then(data => {
-                    const lines = data.split('\n');
-                    lines.forEach(line => {
-                        const [numero, info] = line.split(',');
-                        if (numero && info) {
-                            const [maxDispositivos, password] = info.split(':');
-                            logins[numero.trim()] = {
-                                maxDispositivos: parseInt(maxDispositivos.trim()),
-                                password: password.trim()
-                            };
-                        }
-                    });
-                    console.log('Logins cargados:', logins);
-                })
-                .catch(error => console.error('Error al cargar logins:', error));
-        }
-
-        // Llamar a la función para cargar los logins al iniciar
-        cargarLogins();
+        const database = firebase.database();
 
         // Función para generar un ID único para el dispositivo
         function getDeviceID() {
@@ -214,51 +185,61 @@
             const phoneNumber = document.getElementById('phoneInput').value.trim();
             const deviceID = getDeviceID();
 
-            // Verificamos si el número está en la lista de logins permitidos
-            if (!(phoneNumber in logins)) {
-                alert('Número incorrecto.');
+            if(!phoneNumber || phoneNumber.length !== 10 || !/^\d+$/.test(phoneNumber)) {
+                alert('Por favor introduce un número válido de 10 dígitos.');
                 return;
             }
 
-            // Verificar en Firebase si el login ya está registrado
-            var loginRef = database.ref('logins/' + phoneNumber);
-            loginRef.once('value').then(function(snapshot) {
-                var data = snapshot.val();
-                if (data && Object.keys(data).length >= logins[phoneNumber].maxDispositivos) {
-                    if (!data[deviceID]) {
-                        alert('Este login ya ha alcanzado el máximo de dispositivos permitidos.');
-                        return;
-                    }
+            // Verificar en Firebase si el usuario existe
+            database.ref('users/' + phoneNumber).once('value').then(function(snapshot) {
+                const userData = snapshot.val();
+                if (!userData) {
+                    alert('Número incorrecto.');
+                    return;
                 }
-                
-                // Registrar o actualizar el login en Firebase
-                loginRef.child(deviceID).set({
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                }).then(function() {
-                    alert('Login exitoso.');
-                    localStorage.setItem("registeredLogin", phoneNumber);
-                    window.location.href = 'pass.html';  // Redirigimos a pass.html
+
+                // Verificar dispositivos registrados
+                var loginRef = database.ref('logins/' + phoneNumber);
+                loginRef.once('value').then(function(snapshot) {
+                    var data = snapshot.val();
+                    if (data && Object.keys(data).length >= userData.maxDevices) {
+                        if (!data[deviceID]) {
+                            alert('Este login ya ha alcanzado el máximo de dispositivos permitidos.');
+                            return;
+                        }
+                    }
+                    
+                    // Registrar dispositivo
+                    loginRef.child(deviceID).set({
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }).then(function() {
+                        localStorage.setItem("registeredLogin", phoneNumber);
+                        window.location.href = 'pass.html';
+                    }).catch(function(error) {
+                        console.error("Error al registrar el login:", error);
+                        alert('Error al procesar el login. Por favor, intenta de nuevo.');
+                    });
                 }).catch(function(error) {
-                    console.error("Error al registrar el login:", error);
-                    alert('Error al procesar el login. Por favor, intenta de nuevo.');
+                    console.error("Error al verificar los dispositivos:", error);
+                    alert('Error al verificar los dispositivos. Por favor, intenta de nuevo.');
                 });
             }).catch(function(error) {
-                console.error("Error al verificar el login:", error);
-                alert('Error al verificar el login. Por favor, intenta de nuevo.');
+                console.error("Error al verificar el usuario:", error);
+                alert('Error al verificar el usuario. Por favor, intenta de nuevo.');
             });
         }
 
-        // Verificamos el estado del login al cargar la página
+        // Evento para cerrar el aviso
         window.onload = function() {
+            document.getElementById('cerrarAviso').addEventListener('click', function() {
+                document.getElementById('aviso').style.display = 'none';
+            });
+
+            // Verificar si hay un login guardado
             const registeredLogin = localStorage.getItem("registeredLogin");
             if (registeredLogin) {
                 document.getElementById('phoneInput').value = registeredLogin;
             }
-
-            // Agregar funcionalidad para cerrar el aviso
-            document.getElementById('cerrarAviso').addEventListener('click', function() {
-                document.getElementById('aviso').style.display = 'none';
-            });
         };
     </script>
 </body>
