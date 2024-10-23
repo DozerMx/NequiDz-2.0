@@ -24,83 +24,65 @@
             margin-bottom: 40px;
         }
 
-        .header img {
-            width: 200px;
-            margin-bottom: 20px;
+        .header h1 {
+            color: #db0082;
+            margin-bottom: 10px;
         }
 
-        .options {
-            display: flex;
-            justify-content: space-around;
+        .admin-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
             margin-bottom: 40px;
         }
 
-        .option-btn {
-            padding: 15px 30px;
-            background-color: #db0082;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.2s;
-        }
-
-        .option-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .form-container {
-            background-color: #4d334e;
+        .panel-section {
+            background-color: #3d1459;
             padding: 20px;
             border-radius: 10px;
+            text-align: center;
+        }
+
+        .panel-section h2 {
+            color: #db0082;
             margin-bottom: 20px;
-            display: none;
         }
 
-        .form-container.active {
-            display: block;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .input-group input {
+        input, button {
             width: 100%;
             padding: 10px;
+            margin: 10px 0;
             border: none;
             border-radius: 5px;
-            background-color: #6d4d6e;
+        }
+
+        input {
+            background-color: #4d334e;
             color: white;
         }
 
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
+        button {
             background-color: #db0082;
-            border: none;
-            border-radius: 5px;
             color: white;
             cursor: pointer;
-            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ff0099;
         }
 
         .user-list {
-            background-color: #4d334e;
+            margin-top: 40px;
+            background-color: #3d1459;
             padding: 20px;
             border-radius: 10px;
-            margin-top: 20px;
-            display: none;
         }
 
-        .user-list.active {
-            display: block;
+        .user-list h2 {
+            color: #db0082;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .user-item {
@@ -108,22 +90,19 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px;
-            background-color: #6d4d6e;
-            margin-bottom: 10px;
+            background-color: #4d334e;
+            margin: 10px 0;
             border-radius: 5px;
         }
 
-        .delete-btn {
-            background-color: #ff4444;
-            border: none;
-            border-radius: 5px;
-            color: white;
+        .user-item button {
+            width: auto;
             padding: 5px 10px;
-            cursor: pointer;
+            margin: 0;
         }
 
         .back-arrow {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             cursor: pointer;
@@ -141,40 +120,32 @@
     <div class="back-arrow" onclick="window.location.href='index.html'">
         <img src="https://i.ibb.co/FBr2xh6/Picsart-24-10-20-20-45-27-992.png" alt="Flecha atrás">
     </div>
-
+    
     <div class="container">
         <div class="header">
-            <img src="https://i.postimg.cc/MHwxYt1F/Picsart-24-10-18-02-45-24-316.jpg" alt="Logo">
             <h1>Panel de Administración</h1>
+            <p>Gestión de usuarios y contraseñas</p>
         </div>
 
-        <div class="options">
-            <button class="option-btn" onclick="showAddUser()">Agregar Usuario</button>
-            <button class="option-btn" onclick="showDeleteUser()">Eliminar Usuario</button>
+        <div class="admin-panel">
+            <div class="panel-section">
+                <h2>Agregar Usuario</h2>
+                <input type="text" id="newUserPhone" placeholder="Número de teléfono" maxlength="10">
+                <input type="text" id="newUserDevices" placeholder="Máximo de dispositivos" maxlength="2">
+                <input type="text" id="newUserPassword" placeholder="Contraseña (4 dígitos)" maxlength="4">
+                <button onclick="addUser()">Agregar Usuario</button>
+            </div>
+
+            <div class="panel-section">
+                <h2>Eliminar Usuario</h2>
+                <input type="text" id="deleteUserPhone" placeholder="Número de teléfono" maxlength="10">
+                <button onclick="deleteUser()">Eliminar Usuario</button>
+            </div>
         </div>
 
-        <div id="addUserForm" class="form-container">
-            <h2>Agregar Nuevo Usuario</h2>
-            <div class="input-group">
-                <label>Número de teléfono (10 dígitos)</label>
-                <input type="text" id="newPhone" maxlength="10" pattern="\d*">
-            </div>
-            <div class="input-group">
-                <label>Máximo de dispositivos</label>
-                <input type="number" id="maxDevices" min="1" value="1">
-            </div>
-            <div class="input-group">
-                <label>Contraseña (4 dígitos)</label>
-                <input type="text" id="newPassword" maxlength="4" pattern="\d*">
-            </div>
-            <button class="submit-btn" onclick="addUser()">Agregar Usuario</button>
-        </div>
-
-        <div id="deleteUserForm" class="form-container">
-            <h2>Eliminar Usuario</h2>
-            <div id="userList" class="user-list">
-                <!-- Los usuarios se cargarán aquí dinámicamente -->
-            </div>
+        <div class="user-list">
+            <h2>Usuarios Registrados</h2>
+            <div id="usersList"></div>
         </div>
     </div>
 
@@ -194,86 +165,103 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Verificar acceso de administrador
-        function checkAdminAccess() {
+        // Variables globales
+        let currentUser = null;
+        let logins = {};
+
+        // Verificar autenticación al cargar la página
+        window.onload = function() {
             const registeredLogin = localStorage.getItem("registeredLogin");
             if (registeredLogin !== "6666666666") {
                 alert("Acceso no autorizado");
                 window.location.href = 'index.html';
+                return;
             }
-        }
-
-        // Llamar a la verificación al cargar la página
-        window.onload = checkAdminAccess;
-
-        function showAddUser() {
-            document.getElementById('addUserForm').classList.add('active');
-            document.getElementById('deleteUserForm').classList.remove('active');
-        }
-
-        function showDeleteUser() {
-            document.getElementById('deleteUserForm').classList.add('active');
-            document.getElementById('addUserForm').classList.remove('active');
             loadUsers();
+        };
+
+        // Cargar usuarios desde Firebase
+        function loadUsers() {
+            const usersRef = database.ref('users');
+            usersRef.on('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                updateUsersList(users);
+                logins = users;
+            });
         }
 
-        function addUser() {
-            const phone = document.getElementById('newPhone').value;
-            const maxDevices = document.getElementById('maxDevices').value;
-            const password = document.getElementById('newPassword').value;
+        // Actualizar la lista de usuarios en la interfaz
+        function updateUsersList(users) {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            Object.entries(users).forEach(([phone, data]) => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <span>📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span>
+                    <button onclick="deleteUser('${phone}')">Eliminar</button>
+                `;
+                usersList.appendChild(userItem);
+            });
+        }
 
-            if (phone.length !== 10 || password.length !== 4 || !maxDevices) {
-                alert('Por favor, verifica los datos ingresados');
+        // Agregar nuevo usuario
+        function addUser() {
+            const phone = document.getElementById('newUserPhone').value;
+            const devices = document.getElementById('newUserDevices').value;
+            const password = document.getElementById('newUserPassword').value;
+
+            if (!phone || !devices || !password) {
+                alert('Por favor completa todos los campos');
                 return;
             }
 
-            // Agregar usuario a Firebase
-            database.ref('users/' + phone).set({
-                maxDevices: maxDevices,
-                password: password
-            }).then(() => {
-                alert('Usuario agregado exitosamente');
-                document.getElementById('newPhone').value = '';
-                document.getElementById('maxDevices').value = '1';
-                document.getElementById('newPassword').value = '';
-            }).catch(error => {
-                alert('Error al agregar usuario: ' + error.message);
-            });
-        }
+            if (phone.length !== 10 || password.length !== 4 || !/^\d+$/.test(phone) || !/^\d+$/.test(password)) {
+                alert('Formato inválido. Verifica los datos ingresados.');
+                return;
+            }
 
-        function loadUsers() {
-            const userList = document.getElementById('userList');
-            userList.innerHTML = '<h3>Cargando usuarios...</h3>';
+            const userData = {
+                password: password,
+                maxDevices: parseInt(devices)
+            };
 
-            database.ref('users').once('value').then(snapshot => {
-                userList.innerHTML = '';
-                snapshot.forEach(childSnapshot => {
-                    const phone = childSnapshot.key;
-                    const userData = childSnapshot.val();
-                    
-                    const userDiv = document.createElement('div');
-                    userDiv.className = 'user-item';
-                    userDiv.innerHTML = `
-                        <span>📱 ${phone} (Max: ${userData.maxDevices})</span>
-                        <button class="delete-btn" onclick="deleteUser('${phone}')">Eliminar</button>
-                    `;
-                    userList.appendChild(userDiv);
+            database.ref('users/' + phone).set(userData)
+                .then(() => {
+                    alert('Usuario agregado exitosamente');
+                    document.getElementById('newUserPhone').value = '';
+                    document.getElementById('newUserDevices').value = '';
+                    document.getElementById('newUserPassword').value = '';
+                })
+                .catch((error) => {
+                    alert('Error al agregar usuario: ' + error.message);
                 });
-
-                if (!userList.hasChildNodes()) {
-                    userList.innerHTML = '<p>No hay usuarios registrados</p>';
-                }
-            });
         }
 
+        // Eliminar usuario
         function deleteUser(phone) {
-            if (confirm(`¿Estás seguro de que deseas eliminar el usuario ${phone}?`)) {
+            if (!phone) {
+                phone = document.getElementById('deleteUserPhone').value;
+            }
+
+            if (!phone) {
+                alert('Por favor ingresa un número de teléfono');
+                return;
+            }
+
+            if (phone === '6666666666') {
+                alert('No puedes eliminar al usuario administrador');
+                return;
+            }
+
+            if (confirm(`¿Estás seguro de eliminar el usuario ${phone}?`)) {
                 database.ref('users/' + phone).remove()
                     .then(() => {
                         alert('Usuario eliminado exitosamente');
-                        loadUsers();
+                        document.getElementById('deleteUserPhone').value = '';
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         alert('Error al eliminar usuario: ' + error.message);
                     });
             }
