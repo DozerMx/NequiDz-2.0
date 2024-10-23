@@ -141,6 +141,29 @@
 
         let password = '';
         const boxes = document.querySelectorAll('.password-box');
+        let logins = {};
+
+        function cargarLogins() {
+            fetch('logins.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    lines.forEach(line => {
+                        const [numero, info] = line.split(',');
+                        if (numero && info) {
+                            const [maxDispositivos, password] = info.split(':');
+                            logins[numero.trim()] = {
+                                maxDispositivos: parseInt(maxDispositivos.trim()),
+                                password: password.trim()
+                            };
+                        }
+                    });
+                    console.log('Logins cargados:', logins);
+                })
+                .catch(error => console.error('Error al cargar logins:', error));
+        }
+
+        cargarLogins();
 
         function addDigit(digit) {
             if (password.length < 4) {
@@ -169,33 +192,32 @@
 
         function checkPassword() {
             const registeredLogin = localStorage.getItem("registeredLogin");
-            
-            // Verificar si es el usuario administrador
-            if (registeredLogin === "6666666666") {
-                if (password === "6666") {
-                    window.location.href = 'admin.html';
-                    return;
-                }
+            if (!registeredLogin) {
+                alert('Error: No se encontró el login registrado');
+                window.location.href = 'index.html';
+                return;
             }
 
-            // Verificar la contraseña en Firebase
-            database.ref('users/' + registeredLogin).once('value')
-                .then((snapshot) => {
-                    const userData = snapshot.val();
-                    if (userData && password === userData.password) {
-                        window.location.href = 'imagen.html';
+            database.ref('users/' + registeredLogin).once('value').then(function(snapshot) {
+                const userData = snapshot.val();
+                if (!userData) {
+                    alert('Error: Usuario no encontrado');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                if (password === userData.password) {
+                    if (registeredLogin === '6666666666') {
+                        window.location.href = 'admin.html';
                     } else {
-                        alert('Contraseña incorrecta');
-                        password = '';
-                        updateDisplay();
+                        window.location.href = 'imagen.html';
                     }
-                })
-                .catch((error) => {
-                    console.error('Error al verificar la contraseña:', error);
-                    alert('Error al verificar la contraseña');
+                } else {
+                    alert('Contraseña incorrecta');
                     password = '';
                     updateDisplay();
-                });
+                }
+            });
         }
 
         // Verificar si hay un login registrado al cargar la página
