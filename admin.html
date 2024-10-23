@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            background-color: #1f0020;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header img {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+        }
+
+        .option-btn {
+            padding: 15px 30px;
+            background-color: #db0082;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .option-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .form-container {
+            background-color: #4d334e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6d4d6e;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #db0082;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .user-list {
+            background-color: #4d334e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .user-list.active {
+            display: block;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #6d4d6e;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .delete-btn {
+            background-color: #ff4444;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .back-arrow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+        }
+
+        .back-arrow img {
+            width: 50px;
+            height: auto;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="back-arrow" onclick="window.location.href='index.html'">
+        <img src="https://i.ibb.co/FBr2xh6/Picsart-24-10-20-20-45-27-992.png" alt="Flecha atrás">
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <img src="https://i.postimg.cc/MHwxYt1F/Picsart-24-10-18-02-45-24-316.jpg" alt="Logo">
+            <h1>Panel de Administración</h1>
+        </div>
+
+        <div class="options">
+            <button class="option-btn" onclick="showAddUser()">Agregar Usuario</button>
+            <button class="option-btn" onclick="showDeleteUser()">Eliminar Usuario</button>
+        </div>
+
+        <div id="addUserForm" class="form-container">
+            <h2>Agregar Nuevo Usuario</h2>
+            <div class="input-group">
+                <label>Número de teléfono (10 dígitos)</label>
+                <input type="text" id="newPhone" maxlength="10" pattern="\d*">
+            </div>
+            <div class="input-group">
+                <label>Máximo de dispositivos</label>
+                <input type="number" id="maxDevices" min="1" value="1">
+            </div>
+            <div class="input-group">
+                <label>Contraseña (4 dígitos)</label>
+                <input type="text" id="newPassword" maxlength="4" pattern="\d*">
+            </div>
+            <button class="submit-btn" onclick="addUser()">Agregar Usuario</button>
+        </div>
+
+        <div id="deleteUserForm" class="form-container">
+            <h2>Eliminar Usuario</h2>
+            <div id="userList" class="user-list">
+                <!-- Los usuarios se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJYSDYOCsYCtzl816X_-cCLdwGwDj8_XQ",
+            authDomain: "nequidz-v2.firebaseapp.com",
+            projectId: "nequidz-v2",
+            storageBucket: "nequidz-v2.appspot.com",
+            messagingSenderId: "318211283571",
+            appId: "1:318211283571:web:cc3b2ca16711d52e796806",
+            measurementId: "G-K2422MDNPJ"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Verificar acceso de administrador
+        function checkAdminAccess() {
+            const registeredLogin = localStorage.getItem("registeredLogin");
+            if (registeredLogin !== "6666666666") {
+                alert("Acceso no autorizado");
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Llamar a la verificación al cargar la página
+        window.onload = checkAdminAccess;
+
+        function showAddUser() {
+            document.getElementById('addUserForm').classList.add('active');
+            document.getElementById('deleteUserForm').classList.remove('active');
+        }
+
+        function showDeleteUser() {
+            document.getElementById('deleteUserForm').classList.add('active');
+            document.getElementById('addUserForm').classList.remove('active');
+            loadUsers();
+        }
+
+        function addUser() {
+            const phone = document.getElementById('newPhone').value;
+            const maxDevices = document.getElementById('maxDevices').value;
+            const password = document.getElementById('newPassword').value;
+
+            if (phone.length !== 10 || password.length !== 4 || !maxDevices) {
+                alert('Por favor, verifica los datos ingresados');
+                return;
+            }
+
+            // Agregar usuario a Firebase
+            database.ref('users/' + phone).set({
+                maxDevices: maxDevices,
+                password: password
+            }).then(() => {
+                alert('Usuario agregado exitosamente');
+                document.getElementById('newPhone').value = '';
+                document.getElementById('maxDevices').value = '1';
+                document.getElementById('newPassword').value = '';
+            }).catch(error => {
+                alert('Error al agregar usuario: ' + error.message);
+            });
+        }
+
+        function loadUsers() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '<h3>Cargando usuarios...</h3>';
+
+            database.ref('users').once('value').then(snapshot => {
+                userList.innerHTML = '';
+                snapshot.forEach(childSnapshot => {
+                    const phone = childSnapshot.key;
+                    const userData = childSnapshot.val();
+                    
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'user-item';
+                    userDiv.innerHTML = `
+                        <span>📱 ${phone} (Max: ${userData.maxDevices})</span>
+                        <button class="delete-btn" onclick="deleteUser('${phone}')">Eliminar</button>
+                    `;
+                    userList.appendChild(userDiv);
+                });
+
+                if (!userList.hasChildNodes()) {
+                    userList.innerHTML = '<p>No hay usuarios registrados</p>';
+                }
+            });
+        }
+
+        function deleteUser(phone) {
+            if (confirm(`¿Estás seguro de que deseas eliminar el usuario ${phone}?`)) {
+                database.ref('users/' + phone).remove()
+                    .then(() => {
+                        alert('Usuario eliminado exitosamente');
+                        loadUsers();
+                    })
+                    .catch(error => {
+                        alert('Error al eliminar usuario: ' + error.message);
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
