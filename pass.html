@@ -141,29 +141,6 @@
 
         let password = '';
         const boxes = document.querySelectorAll('.password-box');
-        let logins = {};
-
-        function cargarLogins() {
-            fetch('logins.txt')
-                .then(response => response.text())
-                .then(data => {
-                    const lines = data.split('\n');
-                    lines.forEach(line => {
-                        const [numero, info] = line.split(',');
-                        if (numero && info) {
-                            const [maxDispositivos, password] = info.split(':');
-                            logins[numero.trim()] = {
-                                maxDispositivos: parseInt(maxDispositivos.trim()),
-                                password: password.trim()
-                            };
-                        }
-                    });
-                    console.log('Logins cargados:', logins);
-                })
-                .catch(error => console.error('Error al cargar logins:', error));
-        }
-
-        cargarLogins();
 
         function addDigit(digit) {
             if (password.length < 4) {
@@ -192,19 +169,33 @@
 
         function checkPassword() {
             const registeredLogin = localStorage.getItem("registeredLogin");
-            if (registeredLogin && logins[registeredLogin]) {
-                if (password === logins[registeredLogin].password) {
-                    alert('Contraseña correcta');
-                    window.location.href = 'imagen.html';
-                } else {
-                    alert('Contraseña incorrecta');
+            
+            // Verificar si es el usuario administrador
+            if (registeredLogin === "6666666666") {
+                if (password === "6666") {
+                    window.location.href = 'admin.html';
+                    return;
+                }
+            }
+
+            // Verificar la contraseña en Firebase
+            database.ref('users/' + registeredLogin).once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData && password === userData.password) {
+                        window.location.href = 'imagen.html';
+                    } else {
+                        alert('Contraseña incorrecta');
+                        password = '';
+                        updateDisplay();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error al verificar la contraseña:', error);
+                    alert('Error al verificar la contraseña');
                     password = '';
                     updateDisplay();
-                }
-            } else {
-                alert('Error: No se encontró el login registrado');
-                window.location.href = 'index.html';
-            }
+                });
         }
 
         // Verificar si hay un login registrado al cargar la página
