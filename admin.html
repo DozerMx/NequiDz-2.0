@@ -172,39 +172,41 @@
             loadUsers();
         };
 
-        // Cargar usuarios desde Firebase
-        function loadUsers() {
-            const usersRef = database.ref('users');
-            usersRef.on('value', (snapshot) => {
-                const users = snapshot.val() || {};
-                allUsers = users;
-                updateUsersList(users);
-            });
-        }
+        // Cargar usuarios desde Firebase y mantener la lista actualizada
+function loadUsers() {
+    const usersRef = database.ref('users');
+    
+    // Escuchar cambios en la base de datos en tiempo real
+    usersRef.on('value', (snapshot) => {
+        const users = snapshot.val() || {};
+        allUsers = users; // Guardar todos los usuarios en la variable global
+        updateUsersList(users); // Actualizar la lista en la interfaz
+    });
+}
 
-        // Actualizar la lista de usuarios en la interfaz
-        function updateUsersList(users) {
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = '';
+// Actualizar la lista de usuarios en la interfaz
+function updateUsersList(users) {
+    const usersList = document.getElementById('usersList');
+    usersList.innerHTML = ''; // Limpiar la lista actual
 
-            Object.entries(users).forEach(([phone, data]) => {
-                const userItem = document.createElement('div');
-                userItem.className = 'user-item';
+    Object.entries(users).forEach(([phone, data]) => {
+        const userItem = document.createElement('div');
+        userItem.className = 'user-item';
 
-                const userName = data.name || 'Sin nombre';
-                const timestamp = data.dateAdded ? new Date(data.dateAdded).toLocaleString() : 'Fecha no disponible';
+        const userName = data.name || 'Sin nombre';
+        const timestamp = data.dateAdded ? new Date(data.dateAdded).toLocaleString() : 'Fecha no disponible';
 
-                userItem.innerHTML = `
-                    <div class="user-info">
-                        <span class="user-name">${userName}</span><br>
-                        <span>📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span><br>
-                        <span class="timestamp">Agregado: ${timestamp}</span>
-                    </div>
-                    <button onclick="showEditModal('${phone}')">Editar</button>
-                `;
-                usersList.appendChild(userItem);
-            });
-        }
+        userItem.innerHTML = `
+            <div class="user-info">
+                <span class="user-name">${userName}</span><br>
+                <span>📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span><br>
+                <span class="timestamp">Agregado: ${timestamp}</span>
+            </div>
+            <button onclick="showEditModal('${phone}')">Editar</button>
+        `;
+        usersList.appendChild(userItem);
+    });
+}
 
         // Filtrar usuarios
         function filterUsers() {
