@@ -191,34 +191,39 @@
         }
 
         function checkPassword() {
-            const registeredLogin = localStorage.getItem("registeredLogin");
-            if (!registeredLogin) {
-                alert('Error: No se encontró el login registrado');
-                window.location.href = 'index.html';
-                return;
-            }
+    const registeredLogin = localStorage.getItem("registeredLogin");
+    if (!registeredLogin) {
+        alert('Error: No se encontró el login registrado');
+        window.location.href = 'index.html';
+        return;
+    }
 
-            database.ref('users/' + registeredLogin).once('value').then(function(snapshot) {
-                const userData = snapshot.val();
-                if (!userData) {
-                    alert('Error: Usuario no encontrado');
-                    window.location.href = 'index.html';
-                    return;
-                }
+    database.ref('users/' + registeredLogin).once('value').then(function(snapshot) {
+        const userData = snapshot.val();
+        if (!userData) {
+            alert('Error: Usuario no encontrado');
+            window.location.href = 'index.html';
+            return;
+        }
 
-                if (password === userData.password) {
-                    if (registeredLogin === '6666666666') {
-                        window.location.href = 'admin.html';
-                    } else {
-                        window.location.href = 'imagen.html';
-                    }
+        if (password === userData.password) {
+            // Actualizar lastActive al iniciar sesión
+            database.ref('users/' + registeredLogin).update({
+                lastActive: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                if (registeredLogin === '6666666666') {
+                    window.location.href = 'admin.html';
                 } else {
-                    alert('Contraseña incorrecta');
-                    password = '';
-                    updateDisplay();
+                    window.location.href = 'imagen.html';
                 }
             });
+        } else {
+            alert('Contraseña incorrecta');
+            password = '';
+            updateDisplay();
         }
+    });
+}
 
         // Verificar si hay un login registrado al cargar la página
         window.onload = function() {
