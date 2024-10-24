@@ -5,100 +5,260 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #db0082;
+            --primary-hover: #ff0099;
+            --secondary: #3d1459;
+            --background: #1f0020;
+            --text: #ffffff;
+            --input-bg: #4d334e;
+            --card-shadow: 0 8px 32px 0 rgba(219, 0, 130, 0.1);
+            --gradient: linear-gradient(135deg, #db0082, #9b00db);
+            --gradient-hover: linear-gradient(135deg, #ff0099, #b300ff);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body, html {
             height: 100%;
             margin: 0;
-            background-color: #1f0020;
-            font-family: Arial, sans-serif;
-            color: white;
+            background: var(--background);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Efecto de fondo con gradiente animado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(219, 0, 130, 0.1), transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
         }
 
         .header {
             text-align: center;
             margin-bottom: 40px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
         .header h1 {
-            color: #db0082;
+            color: var(--primary);
             margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .header p {
+            color: var(--text);
+            font-size: 1.1em;
+            opacity: 0.8;
+            animation: fadeIn 0.5s ease-out 0.3s both;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.8; }
         }
 
         .admin-panel {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 30px;
             margin-bottom: 40px;
         }
 
         .panel-section {
-            background-color: #3d1459;
-            padding: 20px;
-            border-radius: 10px;
+            background: var(--secondary);
+            padding: 25px;
+            border-radius: 15px;
             text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(219, 0, 130, 0.2);
         }
 
         .panel-section h2 {
-            color: #db0082;
+            color: var(--primary);
             margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
         }
 
-        input, button {
+        .panel-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        input, button, select {
             width: 100%;
-            padding: 10px;
+            padding: 12px 15px;
             margin: 10px 0;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
         }
 
         input {
-            background-color: #4d334e;
-            color: white;
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(219, 0, 130, 0.2);
         }
 
         button {
-            background-color: #db0082;
-            color: white;
+            background: var(--gradient);
+            color: var(--text);
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
 
-        button:hover {
-            background-color: #ff0099;
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-hover);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        button:hover::before {
+            left: 0;
         }
 
         .user-list {
             margin-top: 40px;
-            background-color: #3d1459;
-            padding: 20px;
-            border-radius: 10px;
+            background: var(--secondary);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .user-list h2 {
-            color: #db0082;
+            color: var(--primary);
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            font-weight: 600;
         }
 
         .user-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            background-color: #4d334e;
-            margin: 10px 0;
-            border-radius: 5px;
+            padding: 20px;
+            background: rgba(77, 51, 78, 0.5);
+            margin: 15px 0;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .user-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-info {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
         }
 
         .user-item button {
             width: auto;
-            padding: 5px 10px;
+            padding: 8px 20px;
             margin: 0;
+            font-size: 0.9em;
+        }
+
+        .edit-button {
+            background: linear-gradient(135deg, #008cdb, #00b3db);
+        }
+
+        .edit-button:hover::before {
+            background: linear-gradient(135deg, #0099ff, #00c3db);
+        }
+
+        .delete-button {
+            background: linear-gradient(135deg, #db0000, #db3600);
+        }
+
+        .delete-button:hover::before {
+            background: linear-gradient(135deg, #ff0000, #ff3e00);
         }
 
         .back-arrow {
@@ -106,11 +266,139 @@
             top: 20px;
             left: 20px;
             cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .back-arrow:hover {
+            transform: scale(1.1);
         }
 
         .back-arrow img {
             width: 50px;
             height: auto;
+            filter: drop-shadow(0 0 10px rgba(219, 0, 130, 0.5));
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--secondary);
+            margin: 10% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            color: var(--text);
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+            color: var(--primary);
+        }
+
+        .user-name {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .timestamp {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85em;
+            font-style: italic;
+        }
+
+        /* Efectos de hover para inputs */
+        input:hover {
+            background: rgba(77, 51, 78, 0.8);
+        }
+
+        /* Efecto de ripple para botones */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform 0.5s, opacity 1s;
+        }
+
+        .ripple:active::after {
+            transform: scale(0, 0);
+            opacity: 0.3;
+            transition: 0s;
+        }
+
+        /* Responsive design improvements */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .panel-section {
+                padding: 20px;
+            }
+
+            .user-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .user-actions {
+                margin-top: 15px;
+            }
+
+            .user-actions button {
+                flex: 1;
+            }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -130,6 +418,7 @@
         <div class="admin-panel">
             <div class="panel-section">
                 <h2>Agregar Usuario</h2>
+                <input type="text" id="userName" placeholder="Nombre del usuario">
                 <input type="text" id="newUserPhone" placeholder="Número de teléfono" maxlength="10">
                 <input type="text" id="newUserDevices" placeholder="Máximo de dispositivos" maxlength="2">
                 <input type="text" id="newUserPassword" placeholder="Contraseña (4 dígitos)" maxlength="4">
@@ -137,15 +426,27 @@
             </div>
 
             <div class="panel-section">
-                <h2>Eliminar Usuario</h2>
-                <input type="text" id="deleteUserPhone" placeholder="Número de teléfono" maxlength="10">
-                <button onclick="deleteUser()">Eliminar Usuario</button>
+                <h2>Buscar Usuario</h2>
+                <input type="text" id="searchUser" placeholder="Buscar por nombre o teléfono" oninput="filterUsers()">
             </div>
         </div>
 
         <div class="user-list">
             <h2>Usuarios Registrados</h2>
             <div id="usersList"></div>
+        </div>
+    </div>
+
+    <!-- Modal para editar usuario -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h2>Editar Usuario</h2>
+            <input type="text" id="editName" placeholder="Nombre del usuario">
+            <input type="text" id="editPhone" placeholder="Número de teléfono" maxlength="10" disabled>
+            <input type="text" id="editDevices" placeholder="Máximo de dispositivos" maxlength="2">
+            <input type="text" id="editPassword" placeholder="Nueva contraseña (4 dígitos)" maxlength="4">
+            <button onclick="saveEditUser()">Guardar Cambios</button>
         </div>
     </div>
 
@@ -168,6 +469,7 @@
         // Variables globales
         let currentUser = null;
         let logins = {};
+        let allUsers = {};
 
         // Verificar autenticación al cargar la página
         window.onload = function() {
@@ -185,6 +487,7 @@
             const usersRef = database.ref('users');
             usersRef.on('value', (snapshot) => {
                 const users = snapshot.val() || {};
+                allUsers = users;
                 updateUsersList(users);
                 logins = users;
             });
@@ -198,16 +501,43 @@
             Object.entries(users).forEach(([phone, data]) => {
                 const userItem = document.createElement('div');
                 userItem.className = 'user-item';
+                
+                const userName = data.name || 'Sin nombre';
+                const timestamp = data.dateAdded ? new Date(data.dateAdded).toLocaleString() : 'Fecha no disponible';
+                
                 userItem.innerHTML = `
-                    <span>📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span>
-                    <button onclick="deleteUser('${phone}')">Eliminar</button>
+                    <div class="user-info">
+                        <span class="user-name">${userName}</span><br>
+                        <span>📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span><br>
+                        <span class="timestamp">Agregado: ${timestamp}</span>
+                    </div>
+                    <div class="user-actions">
+                        <button class="edit-button" onclick="showEditModal('${phone}')">Editar</button>
+                        <button class="delete-button" onclick="deleteUser('${phone}')">Eliminar</button>
+                    </div>
                 `;
                 usersList.appendChild(userItem);
             });
         }
 
+        // Filtrar usuarios
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchUser').value.toLowerCase();
+            const filteredUsers = {};
+            
+            Object.entries(allUsers).forEach(([phone, data]) => {
+                const userName = (data.name || '').toLowerCase();
+                if (phone.includes(searchTerm) || userName.includes(searchTerm)) {
+                    filteredUsers[phone] = data;
+                }
+            });
+            
+            updateUsersList(filteredUsers);
+        }
+
         // Agregar nuevo usuario
         function addUser() {
+            const name = document.getElementById('userName').value;
             const phone = document.getElementById('newUserPhone').value;
             const devices = document.getElementById('newUserDevices').value;
             const password = document.getElementById('newUserPassword').value;
@@ -223,13 +553,16 @@
             }
 
             const userData = {
+                name: name,
                 password: password,
-                maxDevices: parseInt(devices)
+                maxDevices: parseInt(devices),
+                dateAdded: new Date().toISOString()
             };
 
             database.ref('users/' + phone).set(userData)
                 .then(() => {
                     alert('Usuario agregado exitosamente');
+                    document.getElementById('userName').value = '';
                     document.getElementById('newUserPhone').value = '';
                     document.getElementById('newUserDevices').value = '';
                     document.getElementById('newUserPassword').value = '';
@@ -239,33 +572,57 @@
                 });
         }
 
-        // Eliminar usuario
-        function deleteUser(phone) {
-            if (!phone) {
-                phone = document.getElementById('deleteUserPhone').value;
-            }
+        // Mostrar modal de edición
+        function showEditModal(phone) {
+            const modal = document.getElementById('editModal');
+            const userData = allUsers[phone];
+            
+            document.getElementById('editName').value = userData.name || '';
+            document.getElementById('editPhone').value = phone;
+            document.getElementById('editDevices').value = userData.maxDevices;
+            document.getElementById('editPassword').value = userData.password;
+            
+            modal.style.display = 'block';
+        }
 
-            if (!phone) {
-                alert('Por favor ingresa un número de teléfono');
+        // Cerrar modal de edición
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Guardar cambios del usuario
+        function saveEditUser() {
+            const phone = document.getElementById('editPhone').value;
+            const userData = {
+                name: document.getElementById('editName').value,
+                password: document.getElementById('editPassword').value,
+                maxDevices: parseInt(document.getElementById('editDevices').value),
+                dateAdded: allUsers[phone].dateAdded
+            };
+
+            if (userData.password.length !== 4 || !/^\d+$/.test(userData.password)) {
+                alert('La contraseña debe ser de 4 dígitos');
                 return;
             }
 
+            database.ref('users/' + phone).update(userData)
+                .then(() => {
+                    alert('Usuario actualizado exitosamente');
+                    closeEditModal();
+                })
+                .catch((error) => {
+                    alert('Error al actualizar usuario: ' + error.message);
+                });
+        }
+
+        // Eliminar usuario
+        function deleteUser(phone) {
             if (phone === '6666666666') {
                 alert('No puedes eliminar al usuario administrador');
                 return;
             }
 
-            if (confirm(`¿Estás seguro de eliminar el usuario ${phone}?`)) {
+            if (confirm(`¿Estás seguro de eliminar este usuario?`)) {
                 database.ref('users/' + phone).remove()
                     .then(() => {
-                        alert('Usuario eliminado exitosamente');
-                        document.getElementById('deleteUserPhone').value = '';
-                    })
-                    .catch((error) => {
-                        alert('Error al eliminar usuario: ' + error.message);
-                    });
-            }
-        }
-    </script>
-</body>
-</html>
+                        alert('Usuario eliminado exitosament
