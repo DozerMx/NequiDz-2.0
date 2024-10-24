@@ -88,17 +88,50 @@
         .user-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px;
+            align-items: flex-start;
+            padding: 15px;
             background-color: #4d334e;
             margin: 10px 0;
             border-radius: 5px;
         }
 
-        .user-item button {
-            width: auto;
-            padding: 5px 10px;
-            margin: 0 5px;
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-main-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .status-online {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-offline {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .user-timestamp {
+            font-size: 12px;
+            color: #db0082;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 5px;
         }
 
         .back-arrow {
@@ -113,7 +146,6 @@
             height: auto;
         }
 
-        /* Estilos para el modal de edición */
         .modal {
             display: none;
             position: fixed;
@@ -147,11 +179,6 @@
 
         .close:hover {
             color: #ff0099;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 5px;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -234,7 +261,31 @@
                 return;
             }
             loadUsers();
+            setupOnlineStatusListeners();
         };
+
+        // Configurar listeners para el estado online
+        function setupOnlineStatusListeners() {
+            const usersRef = database.ref('users');
+            usersRef.on('child_changed', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData.lastActive) {
+                    checkOnlineStatus(snapshot.key, userData.lastActive);
+                }
+            });
+        }
+
+        // Verificar estado online de un usuario
+        function checkOnlineStatus(userId, lastActive) {
+            const fiveMinutesAgo = Date.now() - (5 * 60 * 1000); // 5 minutos en milisegundos
+            const isOnline = lastActive > fiveMinutesAgo;
+            
+            const statusElement = document.querySelector(`[data-user-status="${userId}"]`);
+            if (statusElement) {
+                statusElement.textContent = isOnline ? 'online ✅' : 'offline 🚫';
+                statusElement.className = `user-status ${isOnline ? 'status-online' : 'status-offline'}`;
+            }
+        }
 
         // Cargar usuarios desde Firebase
         function loadUsers() {
@@ -254,8 +305,20 @@
             Object.entries(users).forEach(([phone, data]) => {
                 const userItem = document.createElement('div');
                 userItem.className = 'user-item';
+                
+                const timestamp = data.createdAt ? new Date(data.createdAt).toLocaleString() : 'Fecha no disponible';
+                const isOnline = data.lastActive && (Date.now() - data.lastActive) < (5 * 60 * 1000);
+                
                 userItem.innerHTML = `
-                    <span>👤 ${data.name || 'Sin nombre'} | 📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span>
+                    <div class="user-info">
+                        <div class="user-main-info">
+                            <span>👤 ${data.name || 'Sin nombre'} | 📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span>
+                            <span class="user-status ${isOnline ? 'status-online' : 'status-offline'}" data-user-status="${phone}">
+                                ${isOnline ? 'online ✅' : 'offline 🚫'}
+                            </span>
+                        </div>
+                        <span class="user-timestamp">Registrado: ${timestamp}</span>
+                    </div>
                     <div class="button-group">
                         <button onclick="openEditModal('${phone}')">Editar</button>
                         <button onclick="deleteUser('${phone}')">Eliminar</button>
@@ -285,7 +348,9 @@
             const userData = {
                 name: name,
                 password: password,
-                maxDevices: parseInt(devices)
+                maxDevices: parseInt(devices),
+                createdAt: Date.now(),
+                lastActive: null
             };
 
             database.ref('users/' + phone).set(userData)
@@ -361,6 +426,16 @@
                 return;
             }
 
+            // Mantener la fecha de creación original
+            if (logins[phone] && logins[phone].createdAt) {
+                userData.createdAt = logins[phone].createdAt;
+            }
+            
+            // Mantener el último estado activo
+            if (logins[phone] && logins[phone].lastActive) {
+                userData.lastActive = logins[phone].lastActive;
+            }
+
             database.ref('users/' + phone).update(userData)
                 .then(() => {
                     alert('Usuario actualizado exitosamente');
@@ -377,6 +452,16 @@
                 closeModal();
             }
         }
+
+        // Actualizar el estado activo de los usuarios cada 30 segundos
+        setInterval(() => {
+            Object.keys(logins).forEach(phone => {
+                if (logins[phone].lastActive) {
+                    checkOnlineStatus(phone, logins[phone].lastActive);
+                }
+            });
+        }, 30000);
+
     </script>
 </body>
 </html>
