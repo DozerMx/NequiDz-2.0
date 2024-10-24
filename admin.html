@@ -34,7 +34,6 @@
             overflow-x: hidden;
         }
 
-        /* Efecto de fondo con gradiente animado */
         body::before {
             content: '';
             position: fixed;
@@ -74,24 +73,12 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
-            animation: slideIn 0.5s ease-out;
         }
 
         .header p {
             color: var(--text);
             font-size: 1.1em;
             opacity: 0.8;
-            animation: fadeIn 0.5s ease-out 0.3s both;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 0.8; }
         }
 
         .admin-panel {
@@ -122,23 +109,9 @@
             margin-bottom: 20px;
             font-size: 1.5em;
             font-weight: 600;
-            position: relative;
-            padding-bottom: 10px;
         }
 
-        .panel-section h2::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: var(--gradient);
-            border-radius: 2px;
-        }
-
-        input, button, select {
+        input, button {
             width: 100%;
             padding: 12px 15px;
             margin: 10px 0;
@@ -151,13 +124,6 @@
         input {
             background: var(--input-bg);
             color: var(--text);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(219, 0, 130, 0.2);
         }
 
         button {
@@ -165,28 +131,7 @@
             color: var(--text);
             cursor: pointer;
             font-weight: 500;
-            letter-spacing: 0.5px;
             text-transform: uppercase;
-            border: none;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-hover);
-            transition: left 0.3s ease;
-            z-index: -1;
-        }
-
-        button:hover::before {
-            left: 0;
         }
 
         .user-list {
@@ -195,12 +140,6 @@
             padding: 25px;
             border-radius: 15px;
             box-shadow: var(--card-shadow);
-            animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .user-list h2 {
@@ -219,18 +158,11 @@
             background: rgba(77, 51, 78, 0.5);
             margin: 15px 0;
             border-radius: 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .user-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .user-info {
             flex-grow: 1;
-            margin-right: 20px;
         }
 
         .user-actions {
@@ -238,47 +170,13 @@
             gap: 15px;
         }
 
-        .user-item button {
-            width: auto;
+        .edit-button, .delete-button {
             padding: 8px 20px;
-            margin: 0;
             font-size: 0.9em;
         }
 
-        .edit-button {
-            background: linear-gradient(135deg, #008cdb, #00b3db);
-        }
-
-        .edit-button:hover::before {
-            background: linear-gradient(135deg, #0099ff, #00c3db);
-        }
-
-        .delete-button {
-            background: linear-gradient(135deg, #db0000, #db3600);
-        }
-
-        .delete-button:hover::before {
-            background: linear-gradient(135deg, #ff0000, #ff3e00);
-        }
-
-        .back-arrow {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            cursor: pointer;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .back-arrow:hover {
-            transform: scale(1.1);
-        }
-
-        .back-arrow img {
-            width: 50px;
-            height: auto;
-            filter: drop-shadow(0 0 10px rgba(219, 0, 130, 0.5));
-        }
+        .edit-button { background: linear-gradient(135deg, #008cdb, #00b3db); }
+        .delete-button { background: linear-gradient(135deg, #db0000, #db3600); }
 
         .modal {
             display: none;
@@ -290,7 +188,6 @@
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(5px);
             z-index: 1000;
-            animation: fadeIn 0.3s ease-out;
         }
 
         .modal-content {
@@ -301,114 +198,23 @@
             width: 90%;
             max-width: 500px;
             border-radius: 15px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.3s ease-out;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        @keyframes modalSlideIn {
-            from { transform: translateY(-100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .close-modal {
             position: absolute;
             right: 15px;
             top: 15px;
-            color: var(--text);
             font-size: 28px;
             cursor: pointer;
-            transition: transform 0.3s ease, color 0.3s ease;
         }
 
-        .close-modal:hover {
-            transform: rotate(90deg);
-            color: var(--primary);
-        }
-
-        .user-name {
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 1.1em;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .timestamp {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.85em;
-            font-style: italic;
-        }
-
-        /* Efectos de hover para inputs */
-        input:hover {
-            background: rgba(77, 51, 78, 0.8);
-        }
-
-        /* Efecto de ripple para botones */
-        .ripple {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ripple::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
-            background-repeat: no-repeat;
-            background-position: 50%;
-            transform: scale(10, 10);
-            opacity: 0;
-            transition: transform 0.5s, opacity 1s;
-        }
-
-        .ripple:active::after {
-            transform: scale(0, 0);
-            opacity: 0.3;
-            transition: 0s;
-        }
-
-        /* Responsive design improvements */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .panel-section {
-                padding: 20px;
-            }
-
-            .user-item {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .user-actions {
-                margin-top: 15px;
-            }
-
-            .user-actions button {
-                flex: 1;
-            }
-        }
+        .user-name { color: var(--primary); }
+        .timestamp { color: rgba(255, 255, 255, 0.6); font-size: 0.85em; font-style: italic; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div class="back-arrow" onclick="window.location.href='index.html'">
-        <img src="https://i.ibb.co/FBr2xh6/Picsart-24-10-20-20-45-27-992.png" alt="Flecha atrás">
-    </div>
-    
     <div class="container">
         <div class="header">
             <h1>Panel de Administración</h1>
@@ -453,13 +259,12 @@
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyBJYSDYOCsYCtzl816X_-cCLdwGwDj8_XQ",
-            authDomain: "nequidz-v2.firebaseapp.com",
-            projectId: "nequidz-v2",
-            storageBucket: "nequidz-v2.appspot.com",
-            messagingSenderId: "318211283571",
-            appId: "1:318211283571:web:cc3b2ca16711d52e796806",
-            measurementId: "G-K2422MDNPJ"
+            apiKey: "your-api-key",
+            authDomain: "your-auth-domain",
+            projectId: "your-project-id",
+            storageBucket: "your-storage-bucket",
+            messagingSenderId: "your-messaging-sender-id",
+            appId: "your-app-id"
         };
 
         // Inicializar Firebase
@@ -467,18 +272,10 @@
         const database = firebase.database();
 
         // Variables globales
-        let currentUser = null;
-        let logins = {};
         let allUsers = {};
 
         // Verificar autenticación al cargar la página
         window.onload = function() {
-            const registeredLogin = localStorage.getItem("registeredLogin");
-            if (registeredLogin !== "6666666666") {
-                alert("Acceso no autorizado");
-                window.location.href = 'index.html';
-                return;
-            }
             loadUsers();
         };
 
@@ -489,7 +286,6 @@
                 const users = snapshot.val() || {};
                 allUsers = users;
                 updateUsersList(users);
-                logins = users;
             });
         }
 
@@ -497,18 +293,18 @@
         function updateUsersList(users) {
             const usersList = document.getElementById('usersList');
             usersList.innerHTML = '';
-            
+
             Object.entries(users).forEach(([phone, data]) => {
                 const userItem = document.createElement('div');
                 userItem.className = 'user-item';
-                
+
                 const userName = data.name || 'Sin nombre';
                 const timestamp = data.dateAdded ? new Date(data.dateAdded).toLocaleString() : 'Fecha no disponible';
-                
+
                 userItem.innerHTML = `
                     <div class="user-info">
                         <span class="user-name">${userName}</span><br>
-                        <span>📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span><br>
+                        <span>📱 ${phone} | 🔑 ${data.password} | Max: ${data.maxDevices}</span><br>
                         <span class="timestamp">Agregado: ${timestamp}</span>
                     </div>
                     <div class="user-actions">
@@ -524,14 +320,14 @@
         function filterUsers() {
             const searchTerm = document.getElementById('searchUser').value.toLowerCase();
             const filteredUsers = {};
-            
+
             Object.entries(allUsers).forEach(([phone, data]) => {
                 const userName = (data.name || '').toLowerCase();
                 if (phone.includes(searchTerm) || userName.includes(searchTerm)) {
                     filteredUsers[phone] = data;
                 }
             });
-            
+
             updateUsersList(filteredUsers);
         }
 
@@ -576,12 +372,12 @@
         function showEditModal(phone) {
             const modal = document.getElementById('editModal');
             const userData = allUsers[phone];
-            
+
             document.getElementById('editName').value = userData.name || '';
             document.getElementById('editPhone').value = phone;
             document.getElementById('editDevices').value = userData.maxDevices;
             document.getElementById('editPassword').value = userData.password;
-            
+
             modal.style.display = 'block';
         }
 
@@ -617,12 +413,16 @@
 
         // Eliminar usuario
         function deleteUser(phone) {
-            if (phone === '6666666666') {
-                alert('No puedes eliminar al usuario administrador');
-                return;
-            }
-
             if (confirm(`¿Estás seguro de eliminar este usuario?`)) {
                 database.ref('users/' + phone).remove()
                     .then(() => {
-                        alert('Usuario eliminado exitosament
+                        alert('Usuario eliminado exitosamente');
+                    })
+                    .catch((error) => {
+                        alert('Error al eliminar usuario: ' + error.message);
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
