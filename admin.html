@@ -98,7 +98,7 @@
         .user-item button {
             width: auto;
             padding: 5px 10px;
-            margin: 0;
+            margin: 0 5px;
         }
 
         .back-arrow {
@@ -111,6 +111,47 @@
         .back-arrow img {
             width: 50px;
             height: auto;
+        }
+
+        /* Estilos para el modal de edición */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #3d1459;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .close {
+            color: #db0082;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #ff0099;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 5px;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -130,6 +171,7 @@
         <div class="admin-panel">
             <div class="panel-section">
                 <h2>Agregar Usuario</h2>
+                <input type="text" id="newUserName" placeholder="Nombre del usuario">
                 <input type="text" id="newUserPhone" placeholder="Número de teléfono" maxlength="10">
                 <input type="text" id="newUserDevices" placeholder="Máximo de dispositivos" maxlength="2">
                 <input type="text" id="newUserPassword" placeholder="Contraseña (4 dígitos)" maxlength="4">
@@ -146,6 +188,19 @@
         <div class="user-list">
             <h2>Usuarios Registrados</h2>
             <div id="usersList"></div>
+        </div>
+    </div>
+
+    <!-- Modal de edición -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Editar Usuario</h2>
+            <input type="text" id="editUserName" placeholder="Nombre del usuario">
+            <input type="text" id="editUserPhone" placeholder="Número de teléfono" maxlength="10" readonly>
+            <input type="text" id="editUserDevices" placeholder="Máximo de dispositivos" maxlength="2">
+            <input type="text" id="editUserPassword" placeholder="Contraseña (4 dígitos)" maxlength="4">
+            <button onclick="saveEditUser()">Guardar Cambios</button>
         </div>
     </div>
 
@@ -168,6 +223,7 @@
         // Variables globales
         let currentUser = null;
         let logins = {};
+        const modal = document.getElementById('editModal');
 
         // Verificar autenticación al cargar la página
         window.onload = function() {
@@ -199,8 +255,11 @@
                 const userItem = document.createElement('div');
                 userItem.className = 'user-item';
                 userItem.innerHTML = `
-                    <span>📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span>
-                    <button onclick="deleteUser('${phone}')">Eliminar</button>
+                    <span>👤 ${data.name || 'Sin nombre'} | 📱 ${phone} | 🔑 ${data.password} | 📱 Max: ${data.maxDevices}</span>
+                    <div class="button-group">
+                        <button onclick="openEditModal('${phone}')">Editar</button>
+                        <button onclick="deleteUser('${phone}')">Eliminar</button>
+                    </div>
                 `;
                 usersList.appendChild(userItem);
             });
@@ -208,11 +267,12 @@
 
         // Agregar nuevo usuario
         function addUser() {
+            const name = document.getElementById('newUserName').value;
             const phone = document.getElementById('newUserPhone').value;
             const devices = document.getElementById('newUserDevices').value;
             const password = document.getElementById('newUserPassword').value;
 
-            if (!phone || !devices || !password) {
+            if (!name || !phone || !devices || !password) {
                 alert('Por favor completa todos los campos');
                 return;
             }
@@ -223,6 +283,7 @@
             }
 
             const userData = {
+                name: name,
                 password: password,
                 maxDevices: parseInt(devices)
             };
@@ -230,6 +291,7 @@
             database.ref('users/' + phone).set(userData)
                 .then(() => {
                     alert('Usuario agregado exitosamente');
+                    document.getElementById('newUserName').value = '';
                     document.getElementById('newUserPhone').value = '';
                     document.getElementById('newUserDevices').value = '';
                     document.getElementById('newUserPassword').value = '';
@@ -264,6 +326,55 @@
                     .catch((error) => {
                         alert('Error al eliminar usuario: ' + error.message);
                     });
+            }
+        }
+
+        // Funciones para el modal de edición
+        function openEditModal(phone) {
+            const userData = logins[phone];
+            document.getElementById('editUserName').value = userData.name || '';
+            document.getElementById('editUserPhone').value = phone;
+            document.getElementById('editUserDevices').value = userData.maxDevices;
+            document.getElementById('editUserPassword').value = userData.password;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function saveEditUser() {
+            const phone = document.getElementById('editUserPhone').value;
+            const userData = {
+                name: document.getElementById('editUserName').value,
+                password: document.getElementById('editUserPassword').value,
+                maxDevices: parseInt(document.getElementById('editUserDevices').value)
+            };
+
+            if (!userData.name || !userData.password || !userData.maxDevices) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+
+            if (userData.password.length !== 4 || !/^\d+$/.test(userData.password)) {
+                alert('Formato de contraseña inválido. Debe ser de 4 dígitos.');
+                return;
+            }
+
+            database.ref('users/' + phone).update(userData)
+                .then(() => {
+                    alert('Usuario actualizado exitosamente');
+                    closeModal();
+                })
+                .catch((error) => {
+                    alert('Error al actualizar usuario: ' + error.message);
+                });
+        }
+
+        // Cerrar el modal si se hace clic fuera de él
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
             }
         }
     </script>
