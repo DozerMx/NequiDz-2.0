@@ -265,15 +265,19 @@
         };
 
         // Configurar listeners para el estado online
-        function setupOnlineStatusListeners() {
-            const usersRef = database.ref('users');
-            usersRef.on('child_changed', (snapshot) => {
-                const userData = snapshot.val();
-                if (userData.lastActive) {
-                    checkOnlineStatus(snapshot.key, userData.lastActive);
-                }
-            });
-        }
+function setupOnlineStatusListeners() {
+    const usersRef = database.ref('users');
+    
+    // Escuchar cambios en tiempo real
+    usersRef.on('value', (snapshot) => {
+        const users = snapshot.val() || {};
+        Object.entries(users).forEach(([phone, userData]) => {
+            if (userData.lastActive) {
+                checkOnlineStatus(phone, userData.lastActive);
+            }
+        });
+    });
+}
 
         // Verificar estado online de un usuario
         function checkOnlineStatus(userId, lastActive) {
