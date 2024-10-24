@@ -1,3 +1,4 @@
+<!-- imagen.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -40,11 +41,61 @@
             background-color: #c10076;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
     <img src="https://i.postimg.cc/9Q04TFmq/Picsart-24-10-18-03-03-17-331.jpg" alt="Imagen Estática">
     <div class="button-container">
         <button onclick="window.location.href='formulario.html'">Generar</button>
     </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJYSDYOCsYCtzl816X_-cCLdwGwDj8_XQ",
+            authDomain: "nequidz-v2.firebaseapp.com",
+            projectId: "nequidz-v2",
+            storageBucket: "nequidz-v2.appspot.com",
+            messagingSenderId: "318211283571",
+            appId: "1:318211283571:web:cc3b2ca16711d52e796806",
+            measurementId: "G-K2422MDNPJ"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Obtener el login registrado
+        const registeredLogin = localStorage.getItem("registeredLogin");
+
+        // Función para actualizar el estado online
+        function updateOnlineStatus() {
+            if (registeredLogin) {
+                database.ref('users/' + registeredLogin).update({
+                    lastActive: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+        }
+
+        // Actualizar estado cuando la página se carga
+        window.onload = function() {
+            updateOnlineStatus();
+        };
+
+        // Actualizar estado cada 10 segundos mientras la página esté abierta
+        setInterval(updateOnlineStatus, 10000);
+
+        // Actualizar estado cuando el usuario está activo en la página
+        document.addEventListener('mousemove', updateOnlineStatus);
+        document.addEventListener('keypress', updateOnlineStatus);
+        document.addEventListener('click', updateOnlineStatus);
+        document.addEventListener('touchstart', updateOnlineStatus);
+
+        // Actualizar estado antes de que el usuario abandone la página
+        window.onbeforeunload = function() {
+            updateOnlineStatus();
+        };
+    </script>
 </body>
 </html>
